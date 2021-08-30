@@ -24,6 +24,7 @@ num_steps = 100
 means = np.random.normal(size=(num_experiments, num_protocols))
 
 
+
 def argmax(q_values):
 
     # Generate a mask of the max values for each row
@@ -90,6 +91,7 @@ def get_data_size_return_action():
     print('..', size)
     print("ok")
     action = choose_protocol()
+    print(action)
     if action == 0:
         print("coap")
         return "coap"
