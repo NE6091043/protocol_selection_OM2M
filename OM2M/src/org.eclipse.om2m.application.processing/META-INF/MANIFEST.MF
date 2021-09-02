@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Processing
+Bundle-SymbolicName: org.eclipse.om2m.application.processing
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.om2m.application.processing.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: org.eclipse.om2m.core.constants,
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.om2m.core.service,
+ org.eclipse.om2m.commons,
+ org.eclipse.osgi,
+ org.apache.commons.logging,
+ org.eclipse.om2m.ipu.service
