@@ -43,14 +43,14 @@ class GreedyAgent:
 
         # self.num_protocols = reward_estimates.shape[1]
         # self.num_experiments = reward_estimates.shape[0]
-        self.reward_estimates = [0,0,0]
-        self.action_count = [0,0,0]
+        self.reward_estimates = [0,0,0,0]
+        self.action_count = [0,0,0,0]
 
     def get_action(self):
         # Our agent is greedy, so there's no need for exploration.
         # Our argmax will do just fine for this situation
         max_value = max(self.reward_estimates) 
-        action=self.reward_estimates.index(max_value) if random.random() > 0.7 else random.randint(0, 2)
+        action=self.reward_estimates.index(max_value) if random.random() > 0.3 else random.randint(0, 3)
         #action_np=argmax(self.reward_estimates)
         #print(self.reward_estimates)
         # Add a 1 to each action selected in the action count
@@ -104,7 +104,7 @@ def get_data_size_return_action():
     if action == 2:
         #print("ws")
         return "ws"
-    return "mqtt"
+    return "xmpp"
 
 # update reward and draw
 
@@ -158,8 +158,8 @@ def update_reward(imm_reward,protocol):
         action_idx = 1
     elif protocol == 'ws':
         action_idx = 2
-    # elif protocol == 'xmpp':
-    #     action_idx = 3
+    elif protocol == 'xmpp':
+        action_idx = 3
 
     agent.update_estimates(imm_reward, action_idx)
     # update reward by delay
