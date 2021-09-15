@@ -92,11 +92,11 @@ record=defaultdict(def_value)
 sadict=dict()
 
 def change_state_range(size):
-    if 1500<size<1999:
+    if 1500<size<2000:
         return 1
-    elif 1999<size<2500:
+    elif 2000<=size<2500:
         return 2
-    elif 2501<size<2999:
+    elif 2500<=size<2999:
         return 3
     else:
         return 4
