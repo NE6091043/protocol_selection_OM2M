@@ -83,25 +83,25 @@ class SarsaTable:
             )
 
 
-agent=SarsaTable(actions=list(range(4)))
+# agent=SarsaTable(actions=list(range(4)))
 
-# store 1000 data avoid buffer too large
-def def_value():
-    return "none"
-record=defaultdict(def_value)
+# # store 1000 data avoid buffer too large
+# def def_value():
+#     return "none"
+# record=defaultdict(def_value)
 
-# state and its chosen action
-sadict=dict()
+# # state and its chosen action
+# sadict=dict()
 
-def change_state_range(size):
-    if 1500<size<2000:
-        return 1
-    elif 2000<=size<2500:
-        return 2
-    elif 2500<=size<2999:
-        return 3
-    else:
-        return 4
+# def change_state_range(size):
+#     if 1500<size<2000:
+#         return 1
+#     elif 2000<=size<2500:
+#         return 2
+#     elif 2500<=size<2999:
+#         return 3
+#     else:
+#         return 4
         
 
 # define init state
@@ -119,7 +119,7 @@ def get_data_size_return_action():
     datasize=float(data[0])
     idx=int(data[1])
     # fill in record
-    record[idx%1000]=[change_state_range(datasize),0.0]
+    # record[idx%1000]=[change_state_range(datasize),0.0]
     # global action,s,immreward
     # learn agent from state before
     # if idx!=0 and idx+1==float(data[1]):
@@ -132,14 +132,14 @@ def get_data_size_return_action():
     # s=[change_state_range(size),0.0]
     
     # action = agent.choose_action(str(s))
-    action = agent.choose_action(str(record[idx%1000]))
-    sadict[str(record[idx%1000])]=action
+    action = random.randint(0, 3)
+    # sadict[str(record[idx%1000])]=action
     # print('..', size)
     # print("ok")
     # print('--------------***********************------------------')
     # print(action)
     # print('--------------***********************------------------')
-    if action.item() == 0:
+    if action == 0:
         #print("coap")
         return "coap"
     if action.item() == 1:
@@ -165,18 +165,18 @@ def receive_action_and_delay_as_reward():
     idx=int(data[1])
     
     
-    s=record[idx%1000]
-    a=sadict[str(s)]
-    r=-delay
-    a_=a
-    if record[(1+idx)%1000]!="none":
-        #get state by idx
-        s_=record[(1+idx)%1000]
-        a_=sadict[str(s_)]
-    else:
-        ##remain the same if state n+1 doesn't exist
-        s_=record[(idx)%1000]
-    agent.learn(str(s), a, r, str(s_), a_)
+    # s=record[idx%1000]
+    # a=sadict[str(s)]
+    # r=-delay
+    # a_=a
+    # if record[(1+idx)%1000]!="none":
+    #     #get state by idx
+    #     s_=record[(1+idx)%1000]
+    #     a_=sadict[str(s_)]
+    # else:
+    #     ##remain the same if state n+1 doesn't exist
+    #     s_=record[(idx)%1000]
+    # agent.learn(str(s), a, r, str(s_), a_)
         
     # res = data.split('//')
     # res[0]=delay
