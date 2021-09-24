@@ -133,15 +133,16 @@ def get_data_size_return_action():
     # print(action)
     # print('--------------***********************------------------')
     if action.item() == 0:
-        #print("coap")
+        print("coap")
         return "coap"
     if action.item() == 1:
-        #print("mqtt")
+        print("mqtt")
         return "mqtt"
     if action.item() == 2:
-        #print("ws")
+        print("ws")
         return "ws"
     if action.item() == 3:
+        print("xmpp")
         return "xmpp"
 
 # update reward 
@@ -175,7 +176,7 @@ def receive_action_and_delay_as_reward():
     # print(res[0])
     # print(res[1])
     # imm_reward = res[0]/res[1]
-    return "aaaa"
+    return ""
 
 
 if __name__ == '__main__':
