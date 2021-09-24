@@ -142,13 +142,13 @@ def get_data_size_return_action():
     if action == 0:
         #print("coap")
         return "coap"
-    if action.item() == 1:
+    if action == 1:
         #print("mqtt")
         return "mqtt"
-    if action.item() == 2:
+    if action == 2:
         #print("ws")
         return "ws"
-    if action.item() == 3:
+    if action == 3:
         return "xmpp"
 
 # update reward 

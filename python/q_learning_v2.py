@@ -47,10 +47,10 @@ class QLearningTable:
         # action selection
         if np.random.uniform() < self.epsilon:
             # choose best action
-            #print(['COAP', 'MQTT', 'WebSocket', 'XMPP'])
+            # print(['COAP', 'MQTT', 'WebSocket', 'XMPP'])
             print(self.q_table)
             state_action = self.q_table.loc[observation, :]
-            print(state_action)
+            # print(state_action)
             # some actions may have the same value, randomly choose on in these actions
             # print(state_action[state_action == np.max(state_action)])
             # print(state_action[state_action == np.max(state_action)].index)
@@ -58,7 +58,7 @@ class QLearningTable:
         else:
             # choose random action
             action = np.random.choice(self.actions)
-        print(action)
+        #print(action)
         print('8888888888888888888888888888888888')
         return action
 
@@ -92,14 +92,9 @@ record=defaultdict(def_value)
 sadict=dict()
 
 def change_state_range(size):
-    if 1500<size<2000:
-        return 1
-    elif 2000<=size<2500:
-        return 2
-    elif 2500<=size<2999:
-        return 3
-    else:
-        return 4
+    # base 1500
+    # max  3500
+    return 1+(size-1500)//100
         
 
 # define init state
