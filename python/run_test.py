@@ -48,9 +48,9 @@ class SarsaTable:
         if np.random.uniform() < self.epsilon:
             # choose best action
             #print(['COAP', 'MQTT', 'WebSocket', 'XMPP'])
-            #print(self.q_table)
+            print(self.q_table)
             state_action = self.q_table.loc[observation, :]
-            #print(state_action)
+            print(state_action)
             # some actions may have the same value, randomly choose on in these actions
             # print(state_action[state_action == np.max(state_action)])
             # print(state_action[state_action == np.max(state_action)].index)
