@@ -4,4 +4,4 @@
 2021.5.25
 2021.8.29
 2021.9.14	
-2021.9.26   //time between gscl nscl
+2021.9.26   //core_delay notify(v8)、apoccontroller(v1)
