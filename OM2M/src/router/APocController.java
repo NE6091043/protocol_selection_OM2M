@@ -21,6 +21,7 @@
  ******************************************************************************/
 package org.eclipse.om2m.core.controller;
 
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
