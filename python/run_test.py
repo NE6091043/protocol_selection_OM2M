@@ -33,7 +33,7 @@ app = Flask(__name__)
 # get data from gscl and return action based on test_update
 
 
-class SarsaTable:
+class QLearningTable:
     def __init__(self, actions, learning_rate=0.01, reward_decay=0.9, e_greedy=0.9):
         self.actions = actions  # a list
         self.lr = learning_rate
@@ -47,10 +47,10 @@ class SarsaTable:
         # action selection
         if np.random.uniform() < self.epsilon:
             # choose best action
-            #print(['COAP', 'MQTT', 'WebSocket', 'XMPP'])
+            # print(['COAP', 'MQTT', 'WebSocket', 'XMPP'])
             print(self.q_table)
             state_action = self.q_table.loc[observation, :]
-            print(state_action)
+            # print(state_action)
             # some actions may have the same value, randomly choose on in these actions
             # print(state_action[state_action == np.max(state_action)])
             # print(state_action[state_action == np.max(state_action)].index)
@@ -58,16 +58,14 @@ class SarsaTable:
         else:
             # choose random action
             action = np.random.choice(self.actions)
-        print(action)
+        #print(action)
         print('8888888888888888888888888888888888')
         return action
 
-    ## only different part from q-learning
-    def learn(self, s, a, r, s_, a_):
+    def learn(self, s, a, r, s_):
         self.check_state_exist(s_)
         q_predict = self.q_table.loc[s, a]
-        ## diff part is here
-        q_target = r + self.gamma * self.q_table.loc[s_, a_]
+        q_target = r + self.gamma * self.q_table.loc[s_, :].max() 
         self.q_table.loc[s, a] += self.lr * (q_target - q_predict)  # update
 
 
@@ -83,7 +81,7 @@ class SarsaTable:
             )
 
 
-agent=SarsaTable(actions=list(range(4)))
+agent=QLearningTable(actions=list(range(4)))
 
 # store 1000 data avoid buffer too large
 def def_value():
@@ -121,7 +119,7 @@ def get_data_size_return_action():
     #     s_=[change_state_range(float(data[0])),0.0]
     #     agent.learn(str(s),action,immreward,str(s_))
     
-    
+       
     
     # state = [data size , avg loss rate before this time]
     # s=[change_state_range(size),0.0]
@@ -164,15 +162,12 @@ def receive_action_and_delay_as_reward():
     s=record[idx%1000]
     a=sadict[str(s)]
     r=-delay
-    a_=a
     if record[(1+idx)%1000]!="none":
         #get state by idx
         s_=record[(1+idx)%1000]
-        a_=sadict[str(s_)]
     else:
-        ##remain the same if state n+1 doesn't exist
         s_=record[(idx)%1000]
-    agent.learn(str(s), a, r, str(s_), a_)
+    agent.learn(str(s), a, r, str(s_))
         
     # res = data.split('//')
     # res[0]=delay

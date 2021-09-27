@@ -70,7 +70,7 @@ public class TestNAForEventDriven {
 
 
 
-	private static String Local_IP = "192.168.72.23";
+	private static String Local_IP = "192.168.72.20";
 
 	//private static String Local_IP = "140.116.247.72";
 
@@ -824,11 +824,11 @@ public class TestNAForEventDriven {
 
 					
 
-					String strNumber = content.substring(content.lastIndexOf("<str name='data' val=") + 22 , content.lastIndexOf("<str name='data' val=") + 25);
+					//String strNumber = content.substring(content.lastIndexOf("<str name='data' val=") + 22 , content.lastIndexOf("<str name='data' val=") + 25);
 
-					order = Integer.parseInt(strNumber);
+					//order = Integer.parseInt(strNumber);
 
-					System.out.println("Order: " + order);
+					System.out.println("Order: " + idx);
 
 					System.out.println("Content Size:" + content.length());
 
@@ -840,13 +840,19 @@ public class TestNAForEventDriven {
 
 					
 
-					delay_sum+=result;
+					// ignore 50 times before
 
-					delay_avg=delay_sum/number;
+					if(number>50) {
 
-					
+						delay_sum+=result;
 
-					System.out.println("total_avg_delay =" + delay_avg);
+						delay_avg=delay_sum/(number-50);
+
+						System.out.println("total_avg_delay =" + delay_avg);
+
+						
+
+					}
 
 					
 

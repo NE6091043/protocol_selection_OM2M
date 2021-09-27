@@ -36,7 +36,7 @@ public class DeviceForEventDriven {
 
 
 
-	public static String deviceIP = "192.168.72.28";
+	public static String deviceIP = "192.168.72.5";
 
 	public static String DeviceID = "D2";
 
