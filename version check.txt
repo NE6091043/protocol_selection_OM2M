@@ -6,3 +6,15 @@
 2021.8.29
 2021.9.14	
 2021.9.26   //core_delay notify(v8)、apoccontroller(v1)、na(v8)、da(v6)
+
+
+
+------------------------------------event------------------------------------------
+2021.12.15     (OM2M)	core/Activator、core/notifier/handle_http、core/notifier/Notifier
+		(na)	v9	
+		(da)	v7
+	      (spider)	test_post_to_om2m	
+
+
+------------------------------------query------------------------------------------	
+
