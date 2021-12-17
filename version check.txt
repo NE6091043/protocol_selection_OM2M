@@ -4,7 +4,7 @@
 2021.5.18
 2021.5.25
 2021.8.29
-2021.9.14	
+2021.9.14   //q-learning notify(v7)、na(v7)、da(b5)
 2021.9.26   //core_delay notify(v8)、apoccontroller(v1)、na(v8)、da(v6)
 
 
@@ -17,9 +17,25 @@
 
 
 
-------------------------------------query------------------------------------------	
+------------------------------------2021.12.15------------------------------------------
+--query	
 2021.12.15   (OM2M NSCL)  core/redirector (v1)
-		(na)	v1	
-	(da、reader handle)	v1、v1
+(na)	v1	
+(da、reader handle)	v1、v1
+
+
+--event
+(OM2M GSCL) core/Activator(v1)、core/notifier/handle_http(v1)、core/notifier/Notifier(v10)
+(na)	v9	
+(da)	v7
+(spider)	test_post_to_om2m 
+
+
+
+------------------------------------2021.12.17------------------------------------------	
+--event
+(na)	v10 --write into csv
+(OM2M GSCL) core/notifier/WANem.java(v1)
+
 
 
