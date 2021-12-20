@@ -35,7 +35,12 @@
 ------------------------------------2021.12.17------------------------------------------	
 --event
 (na)	v10 --write into csv
-(OM2M GSCL) core/notifier/WANem.java(v1)
 
 
+------------------------------------2021.12.20(traffic pattern)------------------------------------------
+--event 
+(python) traffic_pattern(v1).py 
+(OM2M GSCL) core/Activator(v2)、core/notifier/ChangeWanem.java(v1)、core/notifier/Notifier(v11)
+(na)	v11	
+(da)	v8
 
