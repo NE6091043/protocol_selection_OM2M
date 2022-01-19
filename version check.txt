@@ -4,7 +4,7 @@
 2021.5.18
 2021.5.25
 2021.8.29
-2021.9.14   //q-learning notify(v7)、na(v7)、da(b5)
+2021.9.14   //q-learning notify(v7)、na(v7)、da(v5)
 2021.9.26   //core_delay notify(v8)、apoccontroller(v1)、na(v8)、da(v6)
 
 
@@ -48,3 +48,14 @@
 --event 
 (na)	v12	
 (da)	v9
+
+------------------------------------2021.1.19(core delay right version)------------------------------------------
+--event 
+incse router/apoccontroller(v2)
+mncse notify(v12)
+da (v10)
+na (v13)
+DQN v2
+time.sh (v2)
+
+
