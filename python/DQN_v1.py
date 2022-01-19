@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Aug 25 17:52:29 2021
 
-@author: ne6091043
-"""
-
+import tensorflow.compat.v1 as tf
 from flask import Flask, request
 # 用不到gym環境，環境為OM2M
 # from agent import Env, TestEnv
@@ -21,7 +17,11 @@ import random
 import pandas as pd
 import requests
 from collections import defaultdict
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+
+np.random.seed(1)
+tf.random.set_random_seed(1)
 
 app = Flask(__name__)
 
@@ -43,16 +43,9 @@ Using Tensorflow to build the neural network.
 View more on my tutorial page: https://morvanzhou.github.io/tutorials/
 
 Using:
-Tensorflow: 1.0
-gym: 0.7.3
+Tensorflow: 2.7.0
+gym: 0.19.0
 """
-
-import numpy as np
-import pandas as pd
-import tensorflow as tf
-
-np.random.seed(1)
-tf.set_random_seed(1)
 
 
 # Deep Q Network off-policy
@@ -70,7 +63,7 @@ class DQN:
             e_greedy_increment=None,
             output_graph=False,
     ):
-        self.step=0
+        self.step = 0
         self.n_actions = n_actions
         self.n_features = n_features
         self.lr = learning_rate
@@ -86,13 +79,16 @@ class DQN:
         self.learn_step_counter = 0
 
         # initialize zero memory [s, a, r, s_]
-        self.memory = np.zeros((self.memory_size, n_features * 2 + 2))
+        # n_features * 2 <=> s1's n_features + s2's n_features
+        # +2 <=> reward + action
+        self.memory = np.zeros((self.memory_size, n_features*2+2))
 
         # consist of [target_net, evaluate_net]
         self._build_net()
         t_params = tf.get_collection('target_net_params')
         e_params = tf.get_collection('eval_net_params')
-        self.replace_target_op = [tf.assign(t, e) for t, e in zip(t_params, e_params)]
+        self.replace_target_op = [tf.assign(t, e)
+                                  for t, e in zip(t_params, e_params)]
 
         self.sess = tf.Session()
 
@@ -106,53 +102,66 @@ class DQN:
 
     def _build_net(self):
         # ------------------ build evaluate_net ------------------
-        self.s = tf.placeholder(tf.float32, [None, self.n_features], name='s')  # input
-        self.q_target = tf.placeholder(tf.float32, [None, self.n_actions], name='Q_target')  # for calculating loss
+        self.s = tf.placeholder(
+            tf.float32, [None, self.n_features], name='s')  # input
+        self.q_target = tf.placeholder(
+            tf.float32, [None, self.n_actions], name='Q_target')  # for calculating loss
         with tf.variable_scope('eval_net'):
             # c_names(collections_names) are the collections to store variables
             c_names, n_l1, w_initializer, b_initializer = \
                 ['eval_net_params', tf.GraphKeys.GLOBAL_VARIABLES], 10, \
-                tf.random_normal_initializer(0., 0.3), tf.constant_initializer(0.1)  # config of layers
+                tf.random_normal_initializer(
+                    0., 0.3), tf.constant_initializer(0.1)  # config of layers
 
             # first layer. collections is used later when assign to target net
             with tf.variable_scope('l1'):
-                w1 = tf.get_variable('w1', [self.n_features, n_l1], initializer=w_initializer, collections=c_names)
-                b1 = tf.get_variable('b1', [1, n_l1], initializer=b_initializer, collections=c_names)
+                w1 = tf.get_variable(
+                    'w1', [self.n_features, n_l1], initializer=w_initializer, collections=c_names)
+                b1 = tf.get_variable(
+                    'b1', [1, n_l1], initializer=b_initializer, collections=c_names)
                 l1 = tf.nn.relu(tf.matmul(self.s, w1) + b1)
 
             # second layer. collections is used later when assign to target net
             with tf.variable_scope('l2'):
-                w2 = tf.get_variable('w2', [n_l1, self.n_actions], initializer=w_initializer, collections=c_names)
-                b2 = tf.get_variable('b2', [1, self.n_actions], initializer=b_initializer, collections=c_names)
+                w2 = tf.get_variable(
+                    'w2', [n_l1, self.n_actions], initializer=w_initializer, collections=c_names)
+                b2 = tf.get_variable(
+                    'b2', [1, self.n_actions], initializer=b_initializer, collections=c_names)
                 self.q_eval = tf.matmul(l1, w2) + b2
 
         with tf.variable_scope('loss'):
-            self.loss = tf.reduce_mean(tf.squared_difference(self.q_target, self.q_eval))
+            self.loss = tf.reduce_mean(
+                tf.squared_difference(self.q_target, self.q_eval))
         with tf.variable_scope('train'):
-            self._train_op = tf.train.RMSPropOptimizer(self.lr).minimize(self.loss)
+            self._train_op = tf.train.RMSPropOptimizer(
+                self.lr).minimize(self.loss)
 
         # ------------------ build target_net ------------------
-        self.s_ = tf.placeholder(tf.float32, [None, self.n_features], name='s_')    # input
+        self.s_ = tf.placeholder(
+            tf.float32, [None, self.n_features], name='s_')    # input
         with tf.variable_scope('target_net'):
             # c_names(collections_names) are the collections to store variables
             c_names = ['target_net_params', tf.GraphKeys.GLOBAL_VARIABLES]
 
             # first layer. collections is used later when assign to target net
             with tf.variable_scope('l1'):
-                w1 = tf.get_variable('w1', [self.n_features, n_l1], initializer=w_initializer, collections=c_names)
-                b1 = tf.get_variable('b1', [1, n_l1], initializer=b_initializer, collections=c_names)
+                w1 = tf.get_variable(
+                    'w1', [self.n_features, n_l1], initializer=w_initializer, collections=c_names)
+                b1 = tf.get_variable(
+                    'b1', [1, n_l1], initializer=b_initializer, collections=c_names)
                 l1 = tf.nn.relu(tf.matmul(self.s_, w1) + b1)
 
             # second layer. collections is used later when assign to target net
             with tf.variable_scope('l2'):
-                w2 = tf.get_variable('w2', [n_l1, self.n_actions], initializer=w_initializer, collections=c_names)
-                b2 = tf.get_variable('b2', [1, self.n_actions], initializer=b_initializer, collections=c_names)
+                w2 = tf.get_variable(
+                    'w2', [n_l1, self.n_actions], initializer=w_initializer, collections=c_names)
+                b2 = tf.get_variable(
+                    'b2', [1, self.n_actions], initializer=b_initializer, collections=c_names)
                 self.q_next = tf.matmul(l1, w2) + b2
 
     def store_transition(self, s, a, r, s_):
         if not hasattr(self, 'memory_counter'):
             self.memory_counter = 0
-
         transition = np.hstack((s, [a, r], s_))
 
         # replace the old memory with new memory
@@ -167,7 +176,19 @@ class DQN:
 
         if np.random.uniform() < self.epsilon:
             # forward feed the observation and get q value for every actions
-            actions_value = self.sess.run(self.q_eval, feed_dict={self.s: observation})
+            actions_value = self.sess.run(
+                self.q_eval, feed_dict={self.s: observation})
+            # print('--------------***********************------------------')
+            # print('--------------***********************------------------')
+            # print('--------------***********************------------------')
+            # print('--------------***********************------------------')
+            # print('--------------***********************------------------')
+            # print(actions_value)
+            # print('--------------***********************------------------')
+            # print('--------------***********************------------------')
+            # print('--------------***********************------------------')
+            # print('--------------***********************------------------')
+            # print('--------------***********************------------------')
             action = np.argmax(actions_value)
         else:
             action = np.random.randint(0, self.n_actions)
@@ -181,9 +202,11 @@ class DQN:
 
         # sample batch memory from all memory
         if self.memory_counter > self.memory_size:
-            sample_index = np.random.choice(self.memory_size, size=self.batch_size)
+            sample_index = np.random.choice(
+                self.memory_size, size=self.batch_size)
         else:
-            sample_index = np.random.choice(self.memory_counter, size=self.batch_size)
+            sample_index = np.random.choice(
+                self.memory_counter, size=self.batch_size)
         batch_memory = self.memory[sample_index, :]
 
         q_next, q_eval = self.sess.run(
@@ -200,7 +223,8 @@ class DQN:
         eval_act_index = batch_memory[:, self.n_features].astype(int)
         reward = batch_memory[:, self.n_features + 1]
 
-        q_target[batch_index, eval_act_index] = reward + self.gamma * np.max(q_next, axis=1)
+        q_target[batch_index, eval_act_index] = reward + \
+            self.gamma * np.max(q_next, axis=1)
 
         """
         For example in this batch I have 2 samples and 3 actions:
@@ -235,7 +259,8 @@ class DQN:
         self.cost_his.append(self.cost)
 
         # increasing epsilon
-        self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
+        self.epsilon = self.epsilon + \
+            self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
         self.learn_step_counter += 1
 
     def plot_cost(self):
@@ -246,101 +271,118 @@ class DQN:
         plt.show()
 
 
-
-        
-
-
-agent=DQN(n_actions=4,n_features=2,
-                      learning_rate=0.01,
-                      reward_decay=0.9,
-                      e_greedy=0.9,
-                      replace_target_iter=200,
-                      memory_size=2000,
-                      # output_graph=True
-                      )
-
+agent = DQN(4, 2, learning_rate=0.01,
+            reward_decay=0.9,
+            e_greedy=0.9,
+            replace_target_iter=200,
+            memory_size=2000,
+            output_graph=True
+            )
 # store 1000 data avoid buffer too large
-def def_value():
-    return "none"
-record=defaultdict(def_value)
+
+
+# def def_value():
+#     return np.NAN
+
+
+record = dict()
 
 # state and its chosen action
-sadict=dict()
+sadict = dict()
 
 # def change_state_range(size):
 #     # base 1500
 #     # max  3500
 #     return 1+(size-1500)//100
-        
+
 
 # define init state
 # state = [data size , avg loss rate before this time]
 # idx for the state order
-#action = np.int64(0)
-#s=[]
-#immreward=0
+# action = np.int64(0)
+# s=[]
+# immreward=0
+
+
+# observation in maze
+# (2,)                      shape
+# [-0.5 -0.5]               observation
+# <class 'numpy.ndarray'>   type
+
+# modified observation
+# [[0.25 0.  ]]
+# (1, 2)
+# <class 'numpy.ndarray'>
+
+
+# transition in memory
+# transition = np.hstack((s, [a, r], s_))
+# [ 0.25 -0.5   1.    0.    0.25 -0.25]
+# <class 'numpy.ndarray'>
+# (6,)
+
+# memory
+# [[0. 0. 0. 0. 0. 0.]
+#  [0. 0. 0. 0. 0. 0.]
+#  [0. 0. 0. 0. 0. 0.]
+#  ...
+#  [0. 0. 0. 0. 0. 0.]
+#  [0. 0. 0. 0. 0. 0.]
+#  [0. 0. 0. 0. 0. 0.]]
+# (2000, 6)
+# <class 'tuple'>
+
 
 @app.route('/get_data_size_return_action', methods=['POST'])
 def get_data_size_return_action():
-    
+
     # data[0]=datasize,data[1]=idx  for next state
     data = request.data.decode().split('//')
-    datasize=int(data[0])
-    idx=int(data[1])
-    
-    
-    if idx==5000:
-        agent.step+=1
-    
+    datasize = float(data[0])
+    idx = int(data[1])
+
+    if idx == 500:
+        agent.step += 1
+
     # fill in record
     # 5000 idx divide into 100 groups  ==> 5000/100 50個一組
     # 3000 is enough or it might loss
     # now protocol
-    record[idx%3000]=[agent.protocol,math.ceil(idx/50),datasize]
+    # <class 'numpy.ndarray'>
+    record[idx % 500] = np.array([datasize, idx])
     # global action,s,immreward
     # learn agent from state before
     # if idx!=0 and idx+1==float(data[1]):
     #     s_=[change_state_range(float(data[0])),0.0]
     #     agent.learn(str(s),action,immreward,str(s_))
-    
-       
-    
     # state = [data size , avg loss rate before this time]
     # s=[change_state_range(size),0.0]
-    
+
     # action = agent.choose_action(str(s))
-    action = agent.choose_action(str(record[idx%3000]))
-    sadict[str(record[idx%3000])]=action
+    # action = agent.choose_action(str(record[idx % 500]))
+    action = agent.choose_action(record[idx % 500])
+    sadict[np.array_str(record[idx % 500])] = action
     # print('..', size)
     # print("ok")
     # print('--------------***********************------------------')
     # print(action)
     # print('--------------***********************------------------')
-    
     # same used no post
-    if idx>1 and record[(idx-1)%3000]==record[(idx)%3000]:
-        return " "
-        
-    if action.item() == 0:
-        agent.protocol="xmpp"
-        print("xmpp")
-        x=requests.post('http://140.116.247.69:18787/test',"xmpp")
-    elif action.item() == 1:
-        agent.protocol="mqtt"
-        print("mqtt")
-        x=requests.post('http://140.116.247.69:18787/test',"mqtt")
-    elif action.item() == 2:
-        agent.protocol="ws"
-        print("ws")
-        x=requests.post('http://140.116.247.69:18787/test',"ws")
-    else:
-        # action.item() == 3:
-        agent.protocol="coap"
-        print("coap")
-        x=requests.post('http://140.116.247.69:18787/test',"coap")
-    return ""
 
-# update reward 
+    if action == 0:
+        print("coap")
+        return "coap"
+    if action == 1:
+        print("mqtt")
+        return "mqtt"
+    if action == 2:
+        print("ws")
+        return "ws"
+    if action == 3:
+        print("xmpp")
+        return "xmpp"
+
+# update reward
 # not returning anything
 
 
@@ -350,26 +392,24 @@ def receive_action_and_delay_as_reward():
     # state s_ is new observation
     # set immediate reward as delay/data_size
     data = request.data.decode().split('//')
-    delay=float(data[0])
-    idx=int(data[1])
-    number=int(data[2])
-    order=int(data[3])
-    
+    delay = float(data[0])
+    idx = int(data[1])
+
     # order比number越大越好
-    
-    
-    s=s_=record[idx%3000]
-    a=sadict[str(s)]
-    r=(order-number)-delay
-    if record[(1+idx)%3000]!="none":
-        #get state by idx
-        s_=record[(1+idx)%3000]
+
+    # s.shape = (2,1)
+    s = s_ = record[idx % 500]
+    a = sadict[np.array_str(s)]
+    r = - delay
+    if ((1+idx) % 500) in record:
+        # get state by idx
+        s_ = record[(1+idx) % 500]
     agent.store_transition(s, a, r, s_)
-    if agent.step>10 and step%5==0:
+    if agent.step > 300 and agent.step % 5 == 0:
         agent.learn()
-    s=s_
-    agent.learn(str(s), a, r, str(s_))
-        
+    s = s_
+    # agent.learn(str(s), a, r, str(s_))
+
     # res = data.split('//')
     # res[0]=delay
     # res[1]=protocol
@@ -382,5 +422,6 @@ def receive_action_and_delay_as_reward():
 
 if __name__ == '__main__':
     # app.debug = True
-    step=0
     app.run(host='140.116.247.69', port=9000)
+
+    agent.plot_cost()

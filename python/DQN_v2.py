@@ -75,6 +75,8 @@ class DQN:
         self.epsilon_increment = e_greedy_increment
         self.epsilon = 0 if e_greedy_increment is not None else self.epsilon_max
 
+        self.action = 1
+
         # total learning step
         self.learn_step_counter = 0
 
@@ -178,6 +180,18 @@ class DQN:
             # forward feed the observation and get q value for every actions
             actions_value = self.sess.run(
                 self.q_eval, feed_dict={self.s: observation})
+            if str(observation) == '[[2360.    0.]]':
+                print('--------------***********************------------------')
+                print('--------------***********************------------------')
+                print('--------------***********************------------------')
+                print('--------------***********************------------------')
+                print('--------------***********************------------------')
+                print(actions_value)
+                print('--------------***********************------------------')
+                print('--------------***********************------------------')
+                print('--------------***********************------------------')
+                print('--------------***********************------------------')
+                print('--------------***********************------------------')
             action = np.argmax(actions_value)
         else:
             action = np.random.randint(0, self.n_actions)
@@ -339,7 +353,7 @@ def get_data_size_return_action():
     # 3000 is enough or it might loss
     # now protocol
     # <class 'numpy.ndarray'>
-    record[idx % 500] = np.array([datasize, idx])
+    record[idx % 500] = np.array([datasize, agent.action])
     # global action,s,immreward
     # learn agent from state before
     # if idx!=0 and idx+1==float(data[1]):
@@ -351,19 +365,11 @@ def get_data_size_return_action():
     # action = agent.choose_action(str(s))
     # action = agent.choose_action(str(record[idx % 500]))
     action = agent.choose_action(record[idx % 500])
+
+    # switch or not
+    agent.action = action
+
     sadict[np.array_str(record[idx % 500])] = action
-    print('--------------***********************------------------')
-    print('--------------***********************------------------')
-    print('--------------***********************------------------')
-    print('--------------***********************------------------')
-    print('--------------***********************------------------')
-    print('--------------action------------------')
-    print(action)
-    print('--------------***********************------------------')
-    print('--------------***********************------------------')
-    print('--------------***********************------------------')
-    print('--------------***********************------------------')
-    print('--------------***********************------------------')
     # print('..', size)
     # print("ok")
     # print('--------------***********************------------------')
@@ -375,11 +381,11 @@ def get_data_size_return_action():
         print("coap")
         return "coap"
     if action == 1:
-        print("mqtt")
-        return "mqtt"
-    if action == 2:
         print("ws")
         return "ws"
+    if action == 2:
+        print("mqtt")
+        return "mqtt"
     if action == 3:
         print("xmpp")
         return "xmpp"
@@ -400,12 +406,12 @@ def receive_action_and_delay_as_reward():
     # order比number越大越好
 
     # s.shape = (2,1)
-    s = s_ = record[idx % 500]
+    s_ = s = record[idx % 500]
     a = sadict[np.array_str(s)]
     r = - delay
-    if ((1+idx) % 500) in record:
+    if (idx-1 >= 0 and ((idx-1) % 500) in record):
         # get state by idx
-        s_ = record[(1+idx) % 500]
+        s = record[(idx-1) % 500]
     agent.store_transition(s, a, r, s_)
     if agent.step > 300 and agent.step % 5 == 0:
         agent.learn()
