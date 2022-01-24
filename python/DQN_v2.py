@@ -1,23 +1,11 @@
 # -*- coding: utf-8 -*-
-
+import matplotlib.pyplot as plt
 import tensorflow.compat.v1 as tf
+import time
 from flask import Flask, request
 # 用不到gym環境，環境為OM2M
 # from agent import Env, TestEnv
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-import gym
-from tqdm import tqdm
-import time
-import math
-from gym import spaces
-from gym.utils import seeding
-import random
-import pandas as pd
-import requests
-from collections import defaultdict
-import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 
 np.random.seed(1)
@@ -27,7 +15,7 @@ app = Flask(__name__)
 
 # Initialize the environment of our problem
 # num_protocols = 4
-#protocols = ['COAP', 'MQTT', 'WebSocket', 'XMPP']
+# protocols = ['COAP', 'MQTT', 'WebSocket', 'XMPP']
 
 # average delay(ms) of data bytes between 100、500、1000、1500 event-driven in packet loss rate 0 %  means
 # coap:26.705  mqtt:82.5635  ws:105.82  xmpp:96.9525
@@ -48,7 +36,15 @@ gym: 0.19.0
 """
 
 
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
 # Deep Q Network off-policy
+
+
 class DQN:
     def __init__(
             self,
@@ -76,6 +72,8 @@ class DQN:
         self.epsilon = 0 if e_greedy_increment is not None else self.epsilon_max
 
         self.action = 1
+
+        self.cnt = 0
 
         # total learning step
         self.learn_step_counter = 0
@@ -180,18 +178,18 @@ class DQN:
             # forward feed the observation and get q value for every actions
             actions_value = self.sess.run(
                 self.q_eval, feed_dict={self.s: observation})
-            if str(observation) == '[[2360.    0.]]':
-                print('--------------***********************------------------')
-                print('--------------***********************------------------')
-                print('--------------***********************------------------')
-                print('--------------***********************------------------')
-                print('--------------***********************------------------')
-                print(actions_value)
-                print('--------------***********************------------------')
-                print('--------------***********************------------------')
-                print('--------------***********************------------------')
-                print('--------------***********************------------------')
-                print('--------------***********************------------------')
+            # if str(observation) == '[[2360.    0.]]':
+            #     print('--------------***********************------------------')
+            #     print('--------------***********************------------------')
+            #     print('--------------***********************------------------')
+            #     print('--------------***********************------------------')
+            #     print('--------------***********************------------------')
+            #     print(actions_value)
+            #     print('--------------***********************------------------')
+            #     print('--------------***********************------------------')
+            #     print('--------------***********************------------------')
+            #     print('--------------***********************------------------')
+            #     print('--------------***********************------------------')
             action = np.argmax(actions_value)
         else:
             action = np.random.randint(0, self.n_actions)
@@ -266,8 +264,7 @@ class DQN:
             self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
         self.learn_step_counter += 1
 
-    def plot_cost(self):
-        import matplotlib.pyplot as plt
+    def plot_loss(self):
         plt.plot(np.arange(len(self.cost_his)), self.cost_his)
         plt.ylabel('Cost')
         plt.xlabel('training steps')
@@ -345,6 +342,8 @@ def get_data_size_return_action():
     datasize = float(data[0])
     idx = int(data[1])
 
+    agent.cnt += 1
+
     if idx == 500:
         agent.step += 1
 
@@ -381,14 +380,16 @@ def get_data_size_return_action():
         print("coap")
         return "coap"
     if action == 1:
-        print("ws")
-        return "ws"
-    if action == 2:
         print("mqtt")
         return "mqtt"
+    if action == 2:
+        print("ws")
+        return "ws"
     if action == 3:
         print("xmpp")
         return "xmpp"
+
+    return ""
 
 # update reward
 # not returning anything
@@ -420,7 +421,7 @@ def receive_action_and_delay_as_reward():
 
     # res = data.split('//')
     # res[0]=delay
-    # res[1]=protocol
+    # res[1]=protocol.
 
     # print(res[0])
     # print(res[1])
@@ -428,6 +429,20 @@ def receive_action_and_delay_as_reward():
     return ""
 
 
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+
+@app.route('/shutdown', methods=['POST'])
+def shutdown():
+    shutdown_server()
+    return 'Server shutting down...'
+
+
 if __name__ == '__main__':
     # app.debug = True
     app.run(host='140.116.247.69', port=9000)
+    agent.plot_loss()
