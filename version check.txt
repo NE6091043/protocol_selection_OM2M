@@ -57,5 +57,6 @@ da (v10)
 na (v13)
 DQN v2
 time.sh (v2)
+shut_down_server.java (v1) --in TestNA folder,used to plot loss
 
 
