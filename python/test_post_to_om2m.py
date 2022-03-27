@@ -38,5 +38,6 @@ while i<50000:
     if i%4==3:
         s="xmpp"
     i+=1
-    requests.post('http://140.116.247.69:14000/test',s)
+    print(s)
+    requests.post('http://140.116.247.69:18787/test',s)
 
