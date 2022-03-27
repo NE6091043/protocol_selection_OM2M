@@ -60,3 +60,28 @@ time.sh (v2)
 shut_down_server.java (v1) --in TestNA folder,used to plot loss
 
 
+
+------------------------------------2021.3.27(core delay version)------------------------------------------
+--event 
+na (v14)	ok
+da (v11)	ok
+incse controller/apoccontroller(v3)	ok
+mncse notify(v13)	ok
+mncse notify/ChangeWanem.java(v2)	ok
+time.sh (v2)	ok
+shut_down_server.java (v1) --in TestNA folder,used to plot loss	ok
+test_server.java(v1)	not used just test
+
+--query
+na (v2)	ok
+da (v2)	ok
+readerhandlerforquery(v2)	ok
+incse redirector/Redirector.java(v2)	ok
+
+
+mncse notify(v13)	ok
+DQN v3
+time.sh (v2)
+shut_down_server.java (v1) --in TestNA folder,used to plot loss
+
+
