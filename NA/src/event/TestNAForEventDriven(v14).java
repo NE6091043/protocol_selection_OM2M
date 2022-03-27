@@ -1122,14 +1122,6 @@ public class TestNAForEventDriven {
 
 
 
-			int order=0;
-
-
-
-			
-
-
-
 			try {
 
 
@@ -1635,36 +1627,6 @@ public class TestNAForEventDriven {
 
 
 
-
-
-
-
-
-		private void writeToFile(String fileName, String body) throws IOException {
-
-
-
-			FileWriter fw = new FileWriter(fileName, true); // True則表示用附加的方式寫到檔案原有內容之後
-
-
-
-			BufferedWriter bw = new BufferedWriter(fw); // 將BufferedWeiter與FileWrite物件做連結
-
-
-
-			bw.write(body + "\n");
-
-
-
-			bw.flush();
-
-
-
-			bw.close();
-
-
-
-		}
 
 
 
