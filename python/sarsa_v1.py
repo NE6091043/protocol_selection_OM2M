@@ -160,8 +160,7 @@ def receive_action_and_delay_as_reward():
     delay=float(data[0])
     idx=int(data[1])
     
-    
-    s=record[idx%1000]
+    s=s_=record[idx%1000]
     a=sadict[str(s)]
     r=-delay
     a_=a
@@ -169,9 +168,6 @@ def receive_action_and_delay_as_reward():
         #get state by idx
         s_=record[(1+idx)%1000]
         a_=sadict[str(s_)]
-    else:
-        ##remain the same if state n+1 doesn't exist
-        s_=record[(idx)%1000]
     agent.learn(str(s), a, r, str(s_), a_)
         
     # res = data.split('//')

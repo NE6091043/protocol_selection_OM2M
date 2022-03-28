@@ -458,221 +458,221 @@ public class DeviceForEventDriven {
 
 			System.out.println(statusCode);
 
-		
+//		
 
-			
+//			
 
-			
+//			
 
-			String url2 = "";
+//			String url2 = "";
 
-			HttpClient httpclient2;
+//			HttpClient httpclient2;
 
-			PostMethod httpMethod2;
+//			PostMethod httpMethod2;
 
-			StringBuilder sb2;
+//			StringBuilder sb2;
 
-			StringRequestEntity requestEntity2;
+//			StringRequestEntity requestEntity2;
 
-			int statusCode2;
+//			int statusCode2;
 
-			// Create application resource
+//			// Create application resource
 
-			url2 = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications";
+//			url2 = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications";
 
-			httpclient2 = new HttpClient();
+//			httpclient2 = new HttpClient();
 
-			httpMethod2 = new PostMethod(url2);
+//			httpMethod2 = new PostMethod(url2);
 
-			httpMethod2.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
+//			httpMethod2.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
 
-			sb2 = new StringBuilder();
+//			sb2 = new StringBuilder();
 
-			sb2.append("<om2m:application xmlns:om2m='http://uri.etsi.org/m2m' appId='" + DeviceID2 + "_Temp'>");
+//			sb2.append("<om2m:application xmlns:om2m='http://uri.etsi.org/m2m' appId='" + DeviceID2 + "_Temp'>");
 
+//
 
+//			// 公告給NSCL
 
-			// 公告給NSCL
+//			sb2.append("<om2m:announceTo>");
 
-			sb2.append("<om2m:announceTo>");
+//			sb2.append("<om2m:activated>true</om2m:activated>");
 
-			sb2.append("<om2m:activated>true</om2m:activated>");
+//			sb2.append("<om2m:sclList>");
 
-			sb2.append("<om2m:sclList>");
+//			sb2.append("<reference>nscl</reference>");
 
-			sb2.append("<reference>nscl</reference>");
+//			sb2.append("</om2m:sclList>");
 
-			sb2.append("</om2m:sclList>");
+//			sb2.append("</om2m:announceTo>");
 
-			sb2.append("</om2m:announceTo>");
+//
 
+//			sb2.append("<om2m:searchStrings>");
 
+//			sb2.append("<om2m:searchString>ResourceType/Temp</om2m:searchString>");
 
-			sb2.append("<om2m:searchStrings>");
+//			sb2.append("<om2m:searchString>ResourceID/" + DeviceID2 + "_Temp</om2m:searchString>");
 
-			sb2.append("<om2m:searchString>ResourceType/Temp</om2m:searchString>");
+//			sb2.append("</om2m:searchStrings>");
 
-			sb2.append("<om2m:searchString>ResourceID/" + DeviceID2 + "_Temp</om2m:searchString>");
+//
 
-			sb2.append("</om2m:searchStrings>");
+//			sb2.append("</om2m:application>");
 
+//			requestEntity2 = new StringRequestEntity(sb2.toString(), "application/xml", "UTF-8");
 
+//			httpMethod2.setRequestEntity(requestEntity2);
 
-			sb2.append("</om2m:application>");
+//			statusCode2 = httpclient2.executeMethod(httpMethod2);
 
-			requestEntity2 = new StringRequestEntity(sb2.toString(), "application/xml", "UTF-8");
+//			//System.out.println(statusCode);
 
-			httpMethod2.setRequestEntity(requestEntity2);
+//			// Create protocol container resource
 
-			statusCode2 = httpclient2.executeMethod(httpMethod2);
+//			//int statusCode2;
 
-			//System.out.println(statusCode);
+//			url2 = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications/" + DeviceID2 + "_Temp/containers";
 
-			// Create protocol container resource
+//			httpclient2 = new HttpClient();
 
-			//int statusCode2;
+//			httpMethod2 = new PostMethod(url2);
 
-			url2 = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications/" + DeviceID2 + "_Temp/containers";
+//			httpMethod2.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
 
-			httpclient2 = new HttpClient();
+//			sb2 = new StringBuilder();
 
-			httpMethod2 = new PostMethod(url2);
+//			sb2.append("<om2m:container xmlns:om2m='http://uri.etsi.org/m2m' om2m:id='" + dataContainerID2 + "'>");
 
-			httpMethod2.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
+//			
 
-			sb2 = new StringBuilder();
+//			
 
-			sb2.append("<om2m:container xmlns:om2m='http://uri.etsi.org/m2m' om2m:id='" + dataContainerID2 + "'>");
+//			sb2.append("<om2m:searchStrings>");
 
-			
+//			sb2.append("<om2m:searchString>ResourceType/Container</om2m:searchString>");
 
-			
+//			sb2.append("<om2m:searchString>ResourceID/" + DeviceID2 + "_Temp_" + dataContainerID2 + "</om2m:searchString>");
 
-			sb2.append("<om2m:searchStrings>");
+//			sb2.append("</om2m:searchStrings>");
 
-			sb2.append("<om2m:searchString>ResourceType/Container</om2m:searchString>");
+//			sb2.append("</om2m:container>");
 
-			sb2.append("<om2m:searchString>ResourceID/" + DeviceID2 + "_Temp_" + dataContainerID2 + "</om2m:searchString>");
+//			requestEntity2 = new StringRequestEntity(sb2.toString(), "application/xml", "UTF-8");
 
-			sb2.append("</om2m:searchStrings>");
+//			httpMethod2.setRequestEntity(requestEntity2);
 
-			sb2.append("</om2m:container>");
+//			statusCode2 = httpclient2.executeMethod(httpMethod2);
 
-			requestEntity2 = new StringRequestEntity(sb2.toString(), "application/xml", "UTF-8");
+//			System.out.println(statusCode2);
 
-			httpMethod2.setRequestEntity(requestEntity2);
+//			
 
-			statusCode2 = httpclient2.executeMethod(httpMethod2);
+//			
 
-			System.out.println(statusCode2);
+//			
 
-			
+//			String url3 = "";
 
-			
+//			HttpClient httpclient3;
 
-			
+//			PostMethod httpMethod3;
 
-			String url3 = "";
+//			StringBuilder sb3;
 
-			HttpClient httpclient3;
+//			StringRequestEntity requestEntity3;
 
-			PostMethod httpMethod3;
+//			int statusCode3;
 
-			StringBuilder sb3;
+//			// Create application resource
 
-			StringRequestEntity requestEntity3;
+//			url3 = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications";
 
-			int statusCode3;
+//			httpclient3 = new HttpClient();
 
-			// Create application resource
+//			httpMethod3 = new PostMethod(url3);
 
-			url3 = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications";
+//			httpMethod3.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
 
-			httpclient3 = new HttpClient();
+//			sb3 = new StringBuilder();
 
-			httpMethod3 = new PostMethod(url3);
+//			sb3.append("<om2m:application xmlns:om2m='http://uri.etsi.org/m2m' appId='" + DeviceID3 + "_Temp'>");
 
-			httpMethod3.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
+//
 
-			sb3 = new StringBuilder();
+//			// 公告給NSCL
 
-			sb3.append("<om2m:application xmlns:om2m='http://uri.etsi.org/m2m' appId='" + DeviceID3 + "_Temp'>");
+//			sb3.append("<om2m:announceTo>");
 
+//			sb3.append("<om2m:activated>true</om2m:activated>");
 
+//			sb3.append("<om2m:sclList>");
 
-			// 公告給NSCL
+//			sb3.append("<reference>nscl</reference>");
 
-			sb3.append("<om2m:announceTo>");
+//			sb3.append("</om2m:sclList>");
 
-			sb3.append("<om2m:activated>true</om2m:activated>");
+//			sb3.append("</om2m:announceTo>");
 
-			sb3.append("<om2m:sclList>");
+//
 
-			sb3.append("<reference>nscl</reference>");
+//			sb3.append("<om2m:searchStrings>");
 
-			sb3.append("</om2m:sclList>");
+//			sb3.append("<om2m:searchString>ResourceType/Temp</om2m:searchString>");
 
-			sb3.append("</om2m:announceTo>");
+//			sb3.append("<om2m:searchString>ResourceID/" + DeviceID3 + "_Temp</om2m:searchString>");
 
+//			sb3.append("</om2m:searchStrings>");
 
+//
 
-			sb3.append("<om2m:searchStrings>");
+//			sb3.append("</om2m:application>");
 
-			sb3.append("<om2m:searchString>ResourceType/Temp</om2m:searchString>");
+//			requestEntity3 = new StringRequestEntity(sb3.toString(), "application/xml", "UTF-8");
 
-			sb3.append("<om2m:searchString>ResourceID/" + DeviceID3 + "_Temp</om2m:searchString>");
+//			httpMethod3.setRequestEntity(requestEntity3);
 
-			sb3.append("</om2m:searchStrings>");
+//			statusCode3 = httpclient3.executeMethod(httpMethod3);
 
+//			//System.out.println(statusCode);
 
+//			// Create protocol container resource
 
-			sb3.append("</om2m:application>");
+//			//int statusCode3;
 
-			requestEntity3 = new StringRequestEntity(sb3.toString(), "application/xml", "UTF-8");
+//			url3 = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications/" + DeviceID3 + "_Temp/containers";
 
-			httpMethod3.setRequestEntity(requestEntity3);
+//			httpclient3 = new HttpClient();
 
-			statusCode3 = httpclient3.executeMethod(httpMethod3);
+//			httpMethod3 = new PostMethod(url3);
 
-			//System.out.println(statusCode);
+//			httpMethod3.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
 
-			// Create protocol container resource
+//			sb3 = new StringBuilder();
 
-			//int statusCode3;
+//			sb3.append("<om2m:container xmlns:om2m='http://uri.etsi.org/m2m' om2m:id='" + dataContainerID3 + "'>");
 
-			url3 = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications/" + DeviceID3 + "_Temp/containers";
+//			
 
-			httpclient3 = new HttpClient();
+//			
 
-			httpMethod3 = new PostMethod(url3);
+//			sb3.append("<om2m:searchStrings>");
 
-			httpMethod3.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
+//			sb3.append("<om2m:searchString>ResourceType/Container</om2m:searchString>");
 
-			sb3 = new StringBuilder();
+//			sb3.append("<om2m:searchString>ResourceID/" + DeviceID3 + "_Temp_" + dataContainerID3 + "</om2m:searchString>");
 
-			sb3.append("<om2m:container xmlns:om2m='http://uri.etsi.org/m2m' om2m:id='" + dataContainerID3 + "'>");
+//			sb3.append("</om2m:searchStrings>");
 
-			
+//			sb3.append("</om2m:container>");
 
-			
+//			requestEntity3 = new StringRequestEntity(sb3.toString(), "application/xml", "UTF-8");
 
-			sb3.append("<om2m:searchStrings>");
+//			httpMethod3.setRequestEntity(requestEntity3);
 
-			sb3.append("<om2m:searchString>ResourceType/Container</om2m:searchString>");
+//			statusCode3 = httpclient3.executeMethod(httpMethod3);
 
-			sb3.append("<om2m:searchString>ResourceID/" + DeviceID3 + "_Temp_" + dataContainerID3 + "</om2m:searchString>");
-
-			sb3.append("</om2m:searchStrings>");
-
-			sb3.append("</om2m:container>");
-
-			requestEntity3 = new StringRequestEntity(sb3.toString(), "application/xml", "UTF-8");
-
-			httpMethod3.setRequestEntity(requestEntity3);
-
-			statusCode3 = httpclient3.executeMethod(httpMethod3);
-
-			System.out.println(statusCode3);
+//			System.out.println(statusCode3);
 
 
 
@@ -766,7 +766,7 @@ public class DeviceForEventDriven {
 
 						Random rand=new Random();
 
-						int upperbound=1200;
+						int upperbound=1500;
 
 						//2021.5.18 need final declaration
 
@@ -804,15 +804,17 @@ public class DeviceForEventDriven {
 
 							//here change the random range 2021.5.17
 
-							//sb.append("<str name='data' val='" + str_generator(randomdatasize, i) + "'/>");
-
 							sb.append("<str name='data' val='" + str_generator(randomdatasize, i) + "'/>");
 
-							sb.append("<str name='timestamp' val='" + System.currentTimeMillis() + "'/>");
+							//sb.append("<str name='data' val='" + str_generator(1500, i) + "'/>");
 
-							//2021.9.14 mod
+							//sb.append("<str name='timestamp' val='" + System.currentTimeMillis() + "'/>");
+
+							// 2021.9.26 mod
 
 							sb.append("<str name='index' val='" + i + "'/>");
+
+							sb.append("<str name='timestamp' val='" + 0 +"'/>");
 
 							sb.append("</obj>");
 

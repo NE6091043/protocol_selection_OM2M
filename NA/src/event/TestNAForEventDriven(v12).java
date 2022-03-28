@@ -1,76 +1,43 @@
-import java.awt.Toolkit;
-
 import java.io.BufferedWriter;
-
 import java.io.ByteArrayInputStream;
-
 import java.io.FileWriter;
-
 import java.io.IOException;
-
 import java.io.InputStream;
-
 import java.io.UnsupportedEncodingException;
-
 import java.net.InetSocketAddress;
-
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-
 import java.util.List;
-
-import java.util.concurrent.TimeUnit;
-
 import java.util.regex.Matcher;
-
 import java.util.regex.Pattern;
-
-
-
+import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
-
 import javax.xml.parsers.DocumentBuilder;
-
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import javax.xml.parsers.ParserConfigurationException;
-
-
-
 import org.apache.commons.httpclient.HttpClient;
-
 import org.apache.commons.httpclient.methods.DeleteMethod;
-
 import org.apache.commons.httpclient.methods.GetMethod;
-
 import org.apache.commons.httpclient.methods.PostMethod;
-
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-
 import org.w3c.dom.Document;
-
 import org.xml.sax.InputSource;
-
 import org.xml.sax.SAXException;
-
-
-
 import com.sun.net.httpserver.HttpExchange;
-
 import com.sun.net.httpserver.HttpHandler;
-
 import com.sun.net.httpserver.HttpServer;
-
-
 
 // 這是 network application 的測試程式
 
-
-
 public class TestNAForEventDriven {
-
-
-
-	private static String Local_IP = "192.168.72.20";
+	
+	//	delay maxmimum
+	private static int loopcount=500;
+	private static long[] arr=new long[loopcount+1];
+	private static String Local_IP = "192.168.72.9";
 
 	//private static String Local_IP = "140.116.247.72";
 
@@ -78,71 +45,68 @@ public class TestNAForEventDriven {
 
 	private static String context = "/monitor";
 
-	private static String NSCL_IP = "140.116.247.69";
+	private static String INCSE_IP = "140.116.247.69";
 
-	//private static String NSCL_IP = "140.116.247.72";
+	//private static String INCSE_IP = "140.116.247.72";
 
-	private static String NSCL_Port = "18080";
-
-
-
+	private static String INCSE_Port = "18080";
+	
 	private static String app = "NA";
-
-	private static String container = "DATA";
 
 	private static double delay_sum=0.0;
 
 	private static double delay_avg=0.0;
 
-	static int iLoopCount = 1;
-
-
 
 	private static HttpServer server = null;
-
-
+	
 
 	public static HttpServer getServer() {
-
 		return server;
-
 	}
-
+	
+	public static long[] getoutputarr() {
+		return arr.clone();
+	}
 
 
 	public static void setServer(HttpServer server) {
-
 		TestNAForEventDriven.server = server;
-
 	}
 
 
+	public static void main(String[] args) throws InterruptedException, IOException {
+		
+		Arrays.fill(arr,300000);
+		FileWriter writer=new FileWriter("test.csv",false);
+		BufferedWriter bw = new BufferedWriter(writer);
+		bw.write("test");
+		bw.write(',');
+		bw.write("order");
+		bw.write(',');
+		bw.write("delay");
+		bw.write("\n");
+		bw.flush();
+		bw.close();
+		
 
-	public static void main(String[] args) throws InterruptedException {
-
-
+		for(int i=1;i<=loopcount;++i) {
+			writer=new FileWriter("test.csv",true);
+			bw = new BufferedWriter(writer);
+			writer.write("\n");
+			writer.write(String.valueOf(i));
+			bw.write(',');	
+			long x=arr[i];
+			bw.write(String.valueOf(x));
+			bw.flush();
+			bw.close();
+		}
+		
+		System.out.println("create csv sucess!");
+		
 
 		TestNAForEventDriven na = new TestNAForEventDriven();
 
-
-
-		// 設定迴圈次數，這個要跟 NA 的迴圈次數設一樣，以便DA收完資料時能夠自動停止程式。
-
-		String str_test_loop_count = "1000";
-
-
-
-		if (args.length > 0) {
-
-			str_test_loop_count = args[0];
-
-		}
-
-
-
-		iLoopCount = Integer.parseInt(str_test_loop_count);
-
-		System.out.println(iLoopCount);
 
 		na.run();
 
@@ -150,33 +114,30 @@ public class TestNAForEventDriven {
 
 
 
-	private void run() throws InterruptedException {
-
-
+	private void run() throws InterruptedException, IOException {
+		
+		
 
 		// 0. 啟動HTTP server以便接收notification
 
 		StartHTTPServer();
+	
+		
+		// 1. 先刪除INCSE上的NA
+
+		unregisterToINCSE();
 
 
 
-		// 1. 先刪除NSCL上的NA
+		// 2. 向 INCSE 註冊
 
-		unregisterToNSCL();
-
-
-
-		// 2. 向 NSCL 註冊
-
-		registerToNSCL();
+		registerToINCSE();
 
 
 
 		// 3. 搜尋資源(discovery)
 
 		List<String> listReferenceURI = discoverResource("Temp"); // ex:
-
-		// nscl/scls/gscl/applications/D2_TempAnnc
 
 
 
@@ -198,105 +159,17 @@ public class TestNAForEventDriven {
 
 		CreateSubscriptionResource(listLink);
 
-		
-
-		//2021.8.30 modified
-
-//		TimeUnit.SECONDS.sleep(25);
-
-//		
-
-//		//2021.5.25 modified, no needed
-
-//		// 送指令給NSCL，停止 NSCL裡的ping的程式
-
-//		//int statusCode = ChangeWanem.start(0);
-
-//		//int statusCode = 200;
-
-//		//System.out.println("ChangeWanem(0) = " + statusCode);
-
-//		//stopPingOnGSCL("gscl/applications/Ping/process/stop");
-
-//		
-
-//		// 停止 HTTP Server
-
-//		TestNAForEventDriven.getServer().stop(0);
-
-//		System.out.println("finished");
-
-//		
-
-//		//2021.5.25 modified 
-
-//		//used to stop pinging on GSCL
-
-//		double received=(double)number/iLoopCount;
-
-//		received*=100;
-
-//		double loss=100.0-received;
-
-//		System.out.println("Notification loss rate :" + loss +"%");
-
-		
-
-		
-
 	}
 
 	
 
-	private boolean stopPingOnGSCL(String cmd) {
+	private void unregisterToINCSE() {
+
+		System.out.println("unregisterToINCSE...");
 
 		try {
 
-			// 停止GSCL的ping程式
-
-			String url = "http://" + TestNAForEventDriven.NSCL_IP + ":" + TestNAForEventDriven.NSCL_Port + "/om2m/" + cmd;
-
-			HttpClient httpclient = new HttpClient();
-
-			PostMethod httpMethod = new PostMethod(url);
-
-			httpMethod.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
-
-
-
-			int statusCode = httpclient.executeMethod(httpMethod);
-
-			System.out.println("stopPingOnGSCL() = " + statusCode);
-
-			return true;
-
-		} catch (UnsupportedEncodingException e) {
-
-			e.printStackTrace();
-
-		} catch (IOException e) {
-
-			e.printStackTrace();
-
-		}
-
-		return false;
-
-	}
-
-
-
-
-
-	
-
-	private void unregisterToNSCL() {
-
-		System.out.println("unregisterToNSCL...");
-
-		try {
-
-			String url = "http://" + NSCL_IP + ":" + NSCL_Port + "/om2m/nscl/applications/NA";
+			String url = "http://" + INCSE_IP + ":" + INCSE_Port + "/om2m/nscl/applications/NA";
 
 			HttpClient httpclient = new HttpClient();
 
@@ -358,7 +231,7 @@ public class TestNAForEventDriven {
 
 					System.out.println(strLink);
 
-					String url = "http://" + NSCL_IP + ":" + NSCL_Port + "/om2m/" + strLink + "/containers/DATA/contentInstances/subscriptions";
+					String url = "http://" + INCSE_IP + ":" + INCSE_Port + "/om2m/" + strLink + "/containers/DATA/contentInstances/subscriptions";
 
 					HttpClient httpclient = new HttpClient();
 
@@ -366,7 +239,6 @@ public class TestNAForEventDriven {
 
 					httpMethod.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
 
-	
 
 					StringBuilder sb = new StringBuilder();
 
@@ -376,21 +248,15 @@ public class TestNAForEventDriven {
 
 					sb.append("</om2m:subscription>");
 
-	
 
 					StringRequestEntity requestEntity = new StringRequestEntity(sb.toString(), "application/xml", "UTF-8");
 
 					httpMethod.setRequestEntity(requestEntity);
 
-	
 
 					int statusCode = httpclient.executeMethod(httpMethod);
 
 					System.out.println(statusCode);
-
-					String strResponseBody = httpMethod.getResponseBodyAsString();
-
-					// System.out.println(strResponseBody);
 
 					System.out.println("-----------------------------------------------");
 
@@ -408,56 +274,6 @@ public class TestNAForEventDriven {
 
 		}
 
-//		try {
-
-//			System.out.println(listLink.get(2));
-
-//			String url = "http://" + NSCL_IP + ":" + NSCL_Port + "/om2m/" + listLink.get(2) + "/containers/DATA/contentInstances/subscriptions";
-
-//			HttpClient httpclient = new HttpClient();
-
-//			PostMethod httpMethod = new PostMethod(url);
-
-//			httpMethod.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
-
-//
-
-//			StringBuilder sb = new StringBuilder();
-
-//			sb.append("<om2m:subscription xmlns:om2m='http://uri.etsi.org/m2m'>");
-
-//			sb.append("<om2m:contact>nscl/applications/" + app + context + "</om2m:contact>");
-
-//			sb.append("</om2m:subscription>");
-
-//
-
-//			StringRequestEntity requestEntity = new StringRequestEntity(sb.toString(), "application/xml", "UTF-8");
-
-//			httpMethod.setRequestEntity(requestEntity);
-
-//
-
-//			int statusCode = httpclient.executeMethod(httpMethod);
-
-//			System.out.println(statusCode);
-
-//			String strResponseBody = httpMethod.getResponseBodyAsString();
-
-//			// System.out.println(strResponseBody);
-
-//			System.out.println("-----------------------------------------------");
-
-//		} catch (UnsupportedEncodingException e) {
-
-//			e.printStackTrace();
-
-//		} catch (IOException e) {
-
-//			e.printStackTrace();
-
-//		}
-
 	}
 
 
@@ -470,7 +286,7 @@ public class TestNAForEventDriven {
 
 			try {
 
-				String url = "http://" + NSCL_IP + ":" + NSCL_Port + "/om2m/" + strReference;
+				String url = "http://" + INCSE_IP + ":" + INCSE_Port + "/om2m/" + strReference;
 
 				HttpClient httpclient = new HttpClient();
 
@@ -483,12 +299,6 @@ public class TestNAForEventDriven {
 				System.out.println(statusCode);
 
 				String strResponseBody = httpMethod.getResponseBodyAsString();
-
-				// System.out.println(strResponseBody);
-
-
-
-				// get link of resource
 
 				String patternStr = "<om2m:link>(.+)</om2m:link>";
 
@@ -504,8 +314,7 @@ public class TestNAForEventDriven {
 
 				}
 
-
-
+				
 			} catch (UnsupportedEncodingException e) {
 
 				e.printStackTrace();
@@ -523,7 +332,6 @@ public class TestNAForEventDriven {
 	}
 
 
-
 	private List<String> discoverResource(String strResourceType) {
 
 		System.out.println("discoverResource....");
@@ -534,7 +342,7 @@ public class TestNAForEventDriven {
 
 		try {
 
-			String url = "http://" + NSCL_IP + ":" + NSCL_Port + "/om2m/nscl/discovery?searchString=ResourceType/" + strResourceType;
+			String url = "http://" + INCSE_IP + ":" + INCSE_Port + "/om2m/nscl/discovery?searchString=ResourceType/" + strResourceType;
 
 			HttpClient httpclient = new HttpClient();
 
@@ -547,12 +355,6 @@ public class TestNAForEventDriven {
 			System.out.println(statusCode);
 
 			String strResponseBody = httpMethod.getResponseBodyAsString();
-
-			// System.out.println(strResponseBody);
-
-
-
-			// get reference uri of resource
 
 			String patternStr = "<reference>(.+)</reference>";
 
@@ -590,23 +392,23 @@ public class TestNAForEventDriven {
 
 	/**
 
-	 * 向NSCL註冊
+	 * 向INCSE註冊
 
 	 */
 
-	private void registerToNSCL() {
+	private void registerToINCSE() {
 
 
 
 		try {
 
-			System.out.println("registerToNSCL...");
+			System.out.println("registerToINCSE...");
 
 
 
 			// Create NA application
 
-			String url = "http://" + NSCL_IP + ":" + NSCL_Port + "/om2m/nscl/applications";
+			String url = "http://" + INCSE_IP + ":" + INCSE_Port + "/om2m/nscl/applications";
 
 			HttpClient httpclient = new HttpClient();
 
@@ -662,10 +464,9 @@ public class TestNAForEventDriven {
 
 	static int number = 0;
 
-
-
 	static class MyHandler implements HttpHandler {
-
+		
+		
 		public void handle(HttpExchange t) throws IOException {
 
 			String body = "";
@@ -673,8 +474,6 @@ public class TestNAForEventDriven {
 			int i;
 
 			char c;
-
-			
 
 			//2021.5.25 modified 
 
@@ -705,6 +504,7 @@ public class TestNAForEventDriven {
 			}
 
 			++number;
+		
 
 			System.out.println("Received notification:" +number+" times");
 
@@ -713,8 +513,6 @@ public class TestNAForEventDriven {
 			//System.out.println(body);
 
 
-
-			writeBodyToFile(body);
 
 
 
@@ -732,28 +530,18 @@ public class TestNAForEventDriven {
 
 				String contentInstance64 = notifyDoc.getElementsByTagName("om2m:representation").item(0).getTextContent();
 
-				// System.out.println("ContentInstance (Base64-encoded):\n" +
 
-				// contentInstance64 + "\n");
 
 
 
 				String contentInstance = new String(DatatypeConverter.parseBase64Binary(contentInstance64));
 
-				// System.out.println("ContentInstance:\n" + contentInstance +
-
-				// "\n");
 
 
 
 				Document instanceDoc = dBuilder.parse(new InputSource(new ByteArrayInputStream(contentInstance.getBytes("utf-8"))));
 
 				String content64 = instanceDoc.getElementsByTagName("om2m:content").item(0).getTextContent();
-
-				// System.out.println("Content (Base64-encoded):\n" + content64
-
-				// + "\n");
-
 
 
 				final String content = new String(DatatypeConverter.parseBase64Binary(content64));
@@ -781,10 +569,8 @@ public class TestNAForEventDriven {
 				String idx=tmp[1].split("'/></obj>")[0];
 
 
-
-				//System.out.println(protocol);
-
-				
+				String[] data = content.split("<str name='data' val='");
+		        String payload = data[1].split("'/>")[0];
 
 				
 
@@ -794,53 +580,27 @@ public class TestNAForEventDriven {
 
 
 
-					// 取得Device送出訊息時的時間
 
 					long previous_time = Long.parseLong(strTimestamp);
 
-					//2021.5.25 modified 
-
-					//System.out.println("Device time =" + previous_time);
-
-					// 取得目前時間
 
 					long current_time = System.currentTimeMillis();
 
 
 
-					// 將時間相減，算出Delay(ms)
-
 					long result = current_time - previous_time;
-
-					//2021.5.25 modified 
-
-					//System.out.println("current time =" + current_time);
-
-					//2021.5.18
-
-					//no need to show number ,just need order
-
-					//System.out.println(number);
-
-					
-
-					//String strNumber = content.substring(content.lastIndexOf("<str name='data' val=") + 22 , content.lastIndexOf("<str name='data' val=") + 25);
-
-					//order = Integer.parseInt(strNumber);
 
 					System.out.println("Order: " + idx);
 
-					System.out.println("Content Size:" + content.length());
+					System.out.println("Content Size:" + payload.length());
 
-					// System.out.println("Content:\n" + content + "\n");
+			          // System.out.println("Content:\n" + content + "\n");
 
-					System.out.println("body size = " + body.length());
+			        System.out.println("body size = " + body.length());
 
 					System.out.println("time =" + result);
 
 					
-
-					// ignore 50 times before
 
 					if(number>50) {
 
@@ -849,14 +609,9 @@ public class TestNAForEventDriven {
 						delay_avg=delay_sum/(number-50);
 
 						System.out.println("total_avg_delay =" + delay_avg);
-
-						
+	
 
 					}
-
-					
-
-					
 
 					String url = "http://140.116.247.69:9000/receive_delay_as_reward";
 
@@ -868,11 +623,14 @@ public class TestNAForEventDriven {
 
 					sb.append(result);
 
-					//2021.9.14 mod
-
 					sb.append("//");
 
 					sb.append(idx);
+					
+					sb.append("//");
+					sb.append(number);
+					sb.append("//");
+					sb.append(order);
 
 					StringRequestEntity requestEntity = new StringRequestEntity(sb.toString(),"application/xml", "UTF-8");
 
@@ -880,34 +638,17 @@ public class TestNAForEventDriven {
 
 					int statuscode = httpclient.executeMethod(httpMethod);
 
-					//System.out.print(new String(httpMethod.getResponseBody()));
-
+					if(result<=300000) {
+						int line_idx=Integer.parseInt(idx);
+						Path path = Paths.get("test.csv");
+						List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+						String s=idx+","+String.valueOf(result);
+						lines.set(line_idx , s);
+						Files.write(path, lines, StandardCharsets.UTF_8);
+					}
 					
 
-//					String curLoss = "_20_2";
-
-					// 將結果寫到文字檔裡
-
-					//FileWriter fw = new FileWriter("na_delay.txt", true); // True則表示用附加的方式寫到檔案原有內容之後
-
-//					FileWriter fw = new FileWriter("coap_"+content.length()+curLoss+"_na_delay.txt", true); // True則表示用附加的方式寫到檔案原有內容之後
-
-//					writeToFile("xmpp_"+content.length()+curLoss+"_na_delay.txt", String.valueOf(result));
-
-//					
-
-//
-
-//					// Write Order of Message to .txt
-
-//					writeToFile("xmpp_"+content.length()+curLoss+"_na_success.txt", Integer.toString(order));
-
-					//System.out.println("Order: " + order);
-
-					
-
-					System.out.println("-----------------------------------------------");
-
+					System.out.println("---------------------"+statuscode+"------------------------");				
 				}
 
 
@@ -934,115 +675,10 @@ public class TestNAForEventDriven {
 
 			}
 
-//			// 2021.5.20 modified 
 
-//			// 若收到訊息的次數已到達原先設定的迴圈次數就停止程式
+		}		
+		
 
-//			if (number >= TestNAForEventDriven.iLoopCount) {
-
-//
-
-//				// 送指令給NSCL，停止 NSCL裡的ping的程式
-
-//				//int statusCode = ChangeWanem.start(0);
-
-//				int statusCode = 200;
-
-//				//System.out.println("ChangeWanem(0) = " + statusCode);
-
-//				stopPingOnGSCL("gscl/applications/Ping/process/stop");
-
-//
-
-//				// 停止 HTTP Server
-
-//				TestNAForEventDriven.getServer().stop(0);
-
-//				System.out.println("finished");
-
-//			}
-
-			
-
-
-
-			//2021.5.25 modified 
-
-			//used to stop pinging on GSCL
-
-//			if (order >= TestNAForEventDriven.iLoopCount) {
-
-//
-
-//				// 送指令給NSCL，停止 NSCL裡的ping的程式
-
-//				//int statusCode = ChangeWanem.start(0);
-
-//				int statusCode = 200;
-
-//				//System.out.println("ChangeWanem(0) = " + statusCode);
-
-//				stopPingOnGSCL("gscl/applications/Ping/process/stop");
-
-//				
-
-//				// 停止 HTTP Server
-
-//				TestNAForEventDriven.getServer().stop(0);
-
-//				System.out.println("finished");
-
-//				
-
-//				//2021.5.25 modified 
-
-//				//used to stop pinging on GSCL
-
-//				double received=(double)number/order;
-
-//				received*=100;
-
-//				double loss=100.0-received;
-
-//				System.out.println("Notification loss rate :" + loss +"%");
-
-//			}
-
-		}
-
-
-
-		private void writeBodyToFile(String body) throws IOException {
-
-			// 將body寫到文字檔裡
-
-			FileWriter fw = new FileWriter("na_body.txt", true); // True則表示用附加的方式寫到檔案原有內容之後
-
-			BufferedWriter bw = new BufferedWriter(fw); // 將BufferedWeiter與FileWrite物件做連結
-
-			bw.write(body);
-
-			bw.flush();
-
-			bw.close();
-
-		}
-
-
-
-		private void writeToFile(String fileName, String body) throws IOException {
-
-			FileWriter fw = new FileWriter(fileName, true); // True則表示用附加的方式寫到檔案原有內容之後
-
-			BufferedWriter bw = new BufferedWriter(fw); // 將BufferedWeiter與FileWrite物件做連結
-
-			bw.write(body + "\n");
-
-			bw.flush();
-
-			bw.close();
-
-		}
 
 	}
 

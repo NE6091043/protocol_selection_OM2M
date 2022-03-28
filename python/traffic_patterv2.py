@@ -14,10 +14,12 @@ from matplotlib.animation import FuncAnimation
 import gym
 from tqdm import tqdm
 import time
+import math
 from gym import spaces
 from gym.utils import seeding
 import random
 import pandas as pd
+import requests
 from collections import defaultdict
 
 
@@ -40,7 +42,8 @@ class QLearningTable:
         self.gamma = reward_decay
         self.epsilon = e_greedy
         self.q_table = pd.DataFrame(columns=self.actions, dtype=np.float64)
-        
+        # record for learning
+        self.protocol="mqtt"
 
     def choose_action(self, observation):
         self.check_state_exist(observation)
@@ -48,7 +51,7 @@ class QLearningTable:
         if np.random.uniform() < self.epsilon:
             # choose best action
             # print(['COAP', 'MQTT', 'WebSocket', 'XMPP'])
-            print(self.q_table)
+            # print(self.q_table)
             state_action = self.q_table.loc[observation, :]
             # print(state_action)
             # some actions may have the same value, randomly choose on in these actions
@@ -58,8 +61,8 @@ class QLearningTable:
         else:
             # choose random action
             action = np.random.choice(self.actions)
-        #print(action)
-        print('8888888888888888888888888888888888')
+        # print(action)
+        # print('8888888888888888888888888888888888')
         return action
 
     def learn(self, s, a, r, s_):
@@ -80,8 +83,9 @@ class QLearningTable:
                 )
             )
 
-
-agent=QLearningTable(actions=list(range(4)))
+# number of protocols
+num_protocols=1
+agent=QLearningTable(actions=list(range(num_protocols)))
 
 # store 1000 data avoid buffer too large
 def def_value():
@@ -91,10 +95,10 @@ record=defaultdict(def_value)
 # state and its chosen action
 sadict=dict()
 
-def change_state_range(size):
-    # base 1500
-    # max  3500
-    return 1+(size-1500)//100
+# def change_state_range(size):
+#     # base 1500
+#     # max  3500
+#     return 1+(size-1500)//100
         
 
 # define init state
@@ -109,10 +113,13 @@ def get_data_size_return_action():
     
     # data[0]=datasize,data[1]=idx  for next state
     data = request.data.decode().split('//')
-    datasize=float(data[0])
+    datasize=int(data[0])
     idx=int(data[1])
     # fill in record
-    record[idx%1000]=[change_state_range(datasize),0.0]
+    # 5000 idx divide into 100 groups  ==> 5000/100 50個一組
+    # 3000 is enough or it might loss
+    # now protocol
+    record[idx%3000]=[agent.protocol,math.ceil(idx/50),datasize]
     # global action,s,immreward
     # learn agent from state before
     # if idx!=0 and idx+1==float(data[1]):
@@ -125,25 +132,36 @@ def get_data_size_return_action():
     # s=[change_state_range(size),0.0]
     
     # action = agent.choose_action(str(s))
-    action = agent.choose_action(str(record[idx%1000]))
-    sadict[str(record[idx%1000])]=action
+    action = agent.choose_action(str(record[idx%3000]))
+    sadict[str(record[idx%3000])]=action
     # print('..', size)
     # print("ok")
     # print('--------------***********************------------------')
     # print(action)
     # print('--------------***********************------------------')
+    
+    # same used no post
+    if idx>1 and record[(idx-1)%3000]==record[(idx)%3000]:
+        return " "
+        
     if action.item() == 0:
-        print("coap")
-        return "coap"
-    if action.item() == 1:
-        print("mqtt")
-        return "mqtt"
-    if action.item() == 2:
-        print("ws")
-        return "ws"
-    if action.item() == 3:
+        agent.protocol="xmpp"
         print("xmpp")
-        return "xmpp"
+        x=requests.post('http://140.116.247.69:18787/test',"xmpp")
+    elif action.item() == 1:
+        agent.protocol="mqtt"
+        print("mqtt")
+        x=requests.post('http://140.116.247.69:18787/test',"mqtt")
+    elif action.item() == 2:
+        agent.protocol="ws"
+        print("ws")
+        x=requests.post('http://140.116.247.69:18787/test',"ws")
+    else:
+        # action.item() == 3:
+        agent.protocol="coap"
+        print("coap")
+        x=requests.post('http://140.116.247.69:18787/test',"coap")
+    return ""
 
 # update reward 
 # not returning anything
@@ -157,16 +175,18 @@ def receive_action_and_delay_as_reward():
     data = request.data.decode().split('//')
     delay=float(data[0])
     idx=int(data[1])
+    number=int(data[2])
+    order=int(data[3])
+    
+    # order比number越大越好
     
     
-    s=record[idx%1000]
+    s=s_=record[idx%3000]
     a=sadict[str(s)]
-    r=-delay
-    if record[(1+idx)%1000]!="none":
+    r=(order-number)-delay
+    if record[(1+idx)%3000]!="none":
         #get state by idx
-        s_=record[(1+idx)%1000]
-    else:
-        s_=record[(idx)%1000]
+        s_=record[(1+idx)%3000]
     agent.learn(str(s), a, r, str(s_))
         
     # res = data.split('//')

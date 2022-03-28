@@ -70,7 +70,7 @@ public class TestNAForEventDriven {
 
 
 
-	private static String Local_IP = "192.168.72.20";
+	private static String Local_IP = "192.168.72.9";
 
 	//private static String Local_IP = "140.116.247.72";
 
@@ -775,11 +775,13 @@ public class TestNAForEventDriven {
 				
 
 				String[] tmp=content.split("<str name='index' val='");
+					
+//				System.out.println(tmp[1]+"            ");
 
 
+				//2021.9.26
 
-				String idx=tmp[1].split("'/></obj>")[0];
-
+				String idx=tmp[1].split("'/><str name='timestamp'")[0];
 
 
 				//System.out.println(protocol);
@@ -792,25 +794,7 @@ public class TestNAForEventDriven {
 
 					strTimestamp = matcher.group(1);
 
-
-
-					// 取得Device送出訊息時的時間
-
-					long previous_time = Long.parseLong(strTimestamp);
-
-					//2021.5.25 modified 
-
-					//System.out.println("Device time =" + previous_time);
-
-					// 取得目前時間
-
-					long current_time = System.currentTimeMillis();
-
-
-
-					// 將時間相減，算出Delay(ms)
-
-					long result = current_time - previous_time;
+					long result = Long.parseLong(strTimestamp);
 
 					//2021.5.25 modified 
 
@@ -842,18 +826,34 @@ public class TestNAForEventDriven {
 
 					// ignore 50 times before
 
-					if(number>50) {
-
-						delay_sum+=result;
-
-						delay_avg=delay_sum/(number-50);
-
-						System.out.println("total_avg_delay =" + delay_avg);
-
-						
-
+//					if(number>50) {
+//
+//						delay_sum+=result;
+//
+//						delay_avg=delay_sum/(number-50);
+//
+//						System.out.println("total_avg_delay =" + delay_avg);
+//
+//						
+//
+//					}
+					
+					if(result<=0) {
+						System.out.println("ssssssssssssssssssssssssssssssssss");
+						System.out.println("ssssssssssssssssssssssssssssssssss");
+						System.out.println("ssssssssssssssssssssssssssssssssss");
+						System.out.println("ssssssssssssssssssssssssssssssssss");
+						System.out.println("ssssssssssssssssssssssssssssssssss");
+						System.out.println("ssssssssssssssssssssssssssssssssss");
 					}
+					
+					delay_sum+=result;
 
+					delay_avg=delay_sum/number;
+
+					System.out.println("total_avg_delay =" + delay_avg);
+
+					
 					
 
 					

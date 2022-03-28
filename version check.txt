@@ -1,7 +1,87 @@
+------------------------------------event------------------------------------------
 2021.5.11
 2021.5.17
 2021.5.18
 2021.5.25
 2021.8.29
-2021.9.14	
-2021.9.26   //time between gscl nscl
+2021.9.14   //q-learning notify(v7)、na(v7)、da(v5)
+2021.9.26   //core_delay notify(v8)、apoccontroller(v1)、na(v8)、da(v6)
+
+
+
+------------------------------------event------------------------------------------
+2021.12.15   (OM2M GSCL) core/Activator(v1)、core/notifier/handle_http(v1)、core/notifier/Notifier(v10)
+		(na)	v9	
+		(da)	v7
+	      (spider)	test_post_to_om2m 
+
+
+
+------------------------------------2021.12.15------------------------------------------
+--query	
+2021.12.15   (OM2M NSCL)  core/redirector (v1)
+(na)	v1	
+(da、reader handle)	v1、v1
+
+
+--event
+(OM2M GSCL) core/Activator(v1)、core/notifier/handle_http(v1)、core/notifier/Notifier(v10)
+(na)	v9	
+(da)	v7
+(spider)	test_post_to_om2m 
+
+
+
+------------------------------------2021.12.17------------------------------------------	
+--event
+(na)	v10 --write into csv
+
+
+------------------------------------2021.12.20(traffic pattern)------------------------------------------
+--event 
+(python) traffic_pattern(v1).py 
+(OM2M GSCL) core/Activator(v2)、core/notifier/ChangeWanem.java(v1)、core/notifier/Notifier(v11)
+(na)	v11	
+(da)	v8
+
+------------------------------------2021.1.5(clear version no warning)------------------------------------------
+--event 
+(na)	v12	
+(da)	v9
+
+------------------------------------2021.1.19(core delay right version)------------------------------------------
+--event 
+incse router/apoccontroller(v2)
+mncse notify(v12)
+da (v10)
+na (v13)
+DQN v2
+time.sh (v2)
+shut_down_server.java (v1) --in TestNA folder,used to plot loss
+
+
+
+------------------------------------2021.3.27(core delay version)------------------------------------------
+--event 
+na (v14)	ok
+da (v11)	ok
+incse controller/apoccontroller(v3)	ok
+mncse notify(v13)	ok
+mncse notify/ChangeWanem.java(v2)	ok
+time.sh (v2)	ok
+shut_down_server.java (v1) --in TestNA folder,used to plot loss	ok
+test_server.java(v1)	not used just test
+
+--query
+na (v2)	ok
+da (v2)	ok
+readerhandlerforquery(v2)	ok
+incse redirector/Redirector.java(v2)	ok
+
+
+mncse notify(v13)	ok
+DQN v3
+time.sh (v2)
+shut_down_server.java (v1) --in TestNA folder,used to plot loss
+
+

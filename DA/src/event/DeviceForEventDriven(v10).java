@@ -27,7 +27,10 @@ import org.eclipse.californium.core.coap.Response;
 
 
 public class DeviceForEventDriven {
-
+	
+	private static int size=200;
+	
+	private static int sleeptime=50;
 	
 
 	public static String GSCL_IP = "140.116.247.69";
@@ -36,7 +39,7 @@ public class DeviceForEventDriven {
 
 
 
-	public static String deviceIP = "192.168.72.5";
+	public static String deviceIP = "192.168.72.8";
 
 	public static String DeviceID = "D2";
 
@@ -90,7 +93,7 @@ public class DeviceForEventDriven {
 
 		String strPacketLossRate = "0";
 
-		String strLoopCount = "1000";
+		String strLoopCount = "500";
 
 		//2021.5.11 modified
 
@@ -749,170 +752,147 @@ public class DeviceForEventDriven {
 	private void listenToTemp(final Integer iLoopCount, final Integer iDataSize) {
 
 		// 定時送出溫度資料給GSCL
-
+		
+		
 		new Thread() {
-
+			
+			int x=3;
+			
+//			int lowerbound=0,upperbound=1200;
+			
+			int n=x;
 			public void run() {
-
-				for (int i = 1; i <= iLoopCount; i++) {
-
-					try {
-
-						System.out.println(i);	
-
-						System.out.println("ok");	
-
-						//2021.5.11 modified
-
-						Random rand=new Random();
-
-						int upperbound=1200;
-
-						//2021.5.18 need final declaration
-
-						final int randomdatasize = rand.nextInt(upperbound);				
-
-						// Simualte a random measurement of the sensor
-
-						temperatureValue = 10 + (int) (Math.random() * 50);
-
-						//System.out.println("temperatureValue = " + temperatureValue);
-
-
-
-						// Create a data contentInstance
+				
+				while(x>0) {
+					
+//					if(x%50==0) {
+//						lowerbound=500;upperbound=600;
+//					}
+//					if(x%50==10) {
+//						lowerbound=700;upperbound=850;
+//					}
+//					if(x%50==20) {
+//						lowerbound=1000;upperbound=1250;
+//					}
+//					if(x%50==25) {
+//						lowerbound=300;upperbound=550;
+//					}
+//					if(x%50==37) {
+//						lowerbound=800;upperbound=900;
+//					}
+//					if(x%50==49) {
+//						lowerbound=1100;upperbound=1500;
+//					}
+					
+					for (int i = 1; i <= iLoopCount; i++) {
 
 						try {
-
-							String url = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications/" + DeviceID + "_Temp/containers/" + dataContainerID + "/contentInstances";
-
-							HttpClient httpclient = new HttpClient();
-
-							PostMethod httpMethod = new PostMethod(url);
-
-							httpMethod.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
-
-							StringBuilder sb = new StringBuilder();
-
-
-
-							sb.append("<obj>");
-
-							//original
-
-							//sb.append("<str name='data' val='" + str_generator(iDataSize, i) + "'/>");
-
-							//here change the random range 2021.5.17
-
-							//sb.append("<str name='data' val='" + str_generator(randomdatasize, i) + "'/>");
-
-							sb.append("<str name='data' val='" + str_generator(randomdatasize, i) + "'/>");
-
-							sb.append("<str name='timestamp' val='" + System.currentTimeMillis() + "'/>");
-
-							//2021.9.14 mod
-
-							sb.append("<str name='index' val='" + i + "'/>");
-
-							sb.append("</obj>");
-
-
-
-							StringRequestEntity requestEntity = new StringRequestEntity(sb.toString(), "application/xml", "UTF-8");
-
-							httpMethod.setRequestEntity(requestEntity);
-
-							int status = httpclient.executeMethod(httpMethod);
-
 							
+							
+//							System.out.println(i+(n-x)*500);	
+//
+//							System.out.println("ok");	
+			
 
-							System.out.println(status);
+							// Simualte a random measurement of the sensor
 
-							System.out.println("+----------------+");
+							temperatureValue = 10 + (int) (Math.random() * 50);
+
+							//System.out.println("temperatureValue = " + temperatureValue);
+
+//							Random rand=new Random();
+//							final int randomdatasize=lowerbound + rand.nextInt((upperbound - lowerbound) + 1);
+
+							// Create a data contentInstance
+
+							try {
+								
+								if(i==50) {
+									size=180;
+								}
+								
+								if(i==100) {
+									size=350;
+								}
+								
+								if(i==100) {
+									size=500;
+								}
+								
+								//second time
+								if(i==250) {
+									size=500;
+								}
+								
+								//third time
+								if(i==350) {
+									size=800;
+								}
+								
+								if(i==400) {
+									size=900;
+								}
+								
+								if(i==450) {
+									size=1200;
+								}
+
+								String url = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/gscl/applications/" + DeviceID + "_Temp/containers/" + dataContainerID + "/contentInstances";
+
+								HttpClient httpclient = new HttpClient();
+
+								PostMethod httpMethod = new PostMethod(url);
+
+								httpMethod.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
+
+								StringBuilder sb = new StringBuilder();
+
+								
+								sb.append("<obj>");
+								sb.append("<str name='data' val='" + foo(size, i) + "'/>");
+								sb.append("<str name='index' val='" + (i+(n-x)*500) + "'/>");
+								sb.append("<str name='timestamp' val='" + 0 +"'/>");
+								sb.append("</obj>");
+
+
+								StringRequestEntity requestEntity = new StringRequestEntity(sb.toString(), "application/xml", "UTF-8");
+								
+								httpMethod.setRequestEntity(requestEntity);
+
+								int status = httpclient.executeMethod(httpMethod);
+
+								
+
+//								System.out.println(status);
+//
+//								System.out.println("+----------------+");
 
 
 
-						} catch (Exception e) {
+							} catch (Exception e) {
+
+								e.printStackTrace();
+
+							}
+
+
+
+							// Wait for 1 seconds then loop
+
+							Thread.sleep(sleeptime);
+
+
+						} catch (InterruptedException e) {
 
 							e.printStackTrace();
 
 						}
 
-
-
-						// Wait for 1 seconds then loop
-
-						Thread.sleep(1000);
-
-						
-
-						
-
-						// 2021.5.11 modified test
-
-//						String test="gscl/applications/" + DeviceID + "_Temp";
-
-//						test = test + "/containers/DATA/contentInstances/latest/";
-
-//						String urltest = "http://" + GSCL_IP + ":" + GSCL_Port + "/om2m/" + test;
-
-//						HttpClient httpclientTest = new HttpClient();
-
-//						GetMethod httpMethodTest = new GetMethod(urltest);
-
-//						httpMethodTest.addRequestHeader("Authorization", "Basic YWRtaW46YWRtaW4");
-
-//						String strBody="";
-
-//						int statusCode=0;
-
-//						try {
-
-//							statusCode = httpclientTest.executeMethod(httpMethodTest);
-
-//						} catch (HttpException e1) {
-
-//							// TODO Auto-generated catch block
-
-//							e1.printStackTrace();
-
-//						} catch (IOException e1) {
-
-//							// TODO Auto-generated catch block
-
-//							e1.printStackTrace();
-
-//						}
-
-//						try {
-
-//							strBody = httpMethodTest.getResponseBodyAsString();
-
-//						} catch (IOException e) {
-
-//							// TODO Auto-generated catch block
-
-//							e.printStackTrace();
-
-//						}
-
-//						String[] tmp=strBody.split("<om2m:contentSize>");
-
-//						String output=tmp[1].split("</om2m:contentSize>")[0];
-
-//						//System.out.println(statusCode);
-
-//						System.out.println(output);
-
-					} catch (InterruptedException e) {
-
-						e.printStackTrace();
-
 					}
-
+					--x;
 				}
-
 				
+
 
 			}
 
@@ -920,7 +900,38 @@ public class DeviceForEventDriven {
 
 	}
 
+	static String foo(int size, int order) {
+	    // mod
 
+	    // 2021.11.14
+
+	    // java char size == 2 bytes
+
+	    
+
+	    // mod
+
+	    // 2021.12.9
+
+		// StringBuffer out = new StringBuffer();
+
+		// java char size == 2 bytes
+
+		  
+
+	    String res="";
+
+	    
+
+	    for (int i = 0; i < size; ++i) {
+
+	      res+='a';
+
+	    }
+
+	    return res;
+
+	  }
 
 	private void CreateDeviceResource() {
 

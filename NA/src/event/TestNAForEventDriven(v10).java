@@ -1,3 +1,4 @@
+
 import java.awt.Toolkit;
 
 import java.io.BufferedWriter;
@@ -13,7 +14,10 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import java.net.InetSocketAddress;
-
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import java.util.List;
@@ -24,6 +28,7 @@ import java.util.regex.Matcher;
 
 import java.util.regex.Pattern;
 
+import java.util.Arrays;
 
 
 import javax.xml.bind.DatatypeConverter;
@@ -61,16 +66,23 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 
 // 這是 network application 的測試程式
 
 
 
 public class TestNAForEventDriven {
+	
+	//	delay maxmimum
+	private static int loopcount=1000;
+	private static long[] arr=new long[loopcount+1];
+	
 
-
-
-	private static String Local_IP = "192.168.72.20";
+	private static String Local_IP = "192.168.72.9";
 
 	//private static String Local_IP = "140.116.247.72";
 
@@ -94,9 +106,8 @@ public class TestNAForEventDriven {
 
 	private static double delay_avg=0.0;
 
-	static int iLoopCount = 1;
-
-
+	static int iLoopCount = 10;
+	
 
 	private static HttpServer server = null;
 
@@ -106,6 +117,10 @@ public class TestNAForEventDriven {
 
 		return server;
 
+	}
+	
+	public static long[] getoutputarr() {
+		return arr.clone();
 	}
 
 
@@ -118,31 +133,40 @@ public class TestNAForEventDriven {
 
 
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, IOException {
+		
+		
+		Arrays.fill(arr,300000);
+		
+		FileWriter writer=new FileWriter("test.csv",false);
+		BufferedWriter bw = new BufferedWriter(writer);
+		bw.write("test");
+		bw.write(',');
+		bw.write("order");
+		bw.write(',');
+		bw.write("delay");
+		bw.write("\n");
+		bw.flush();
+		bw.close();
+		
 
-
+		for(int i=1;i<=loopcount;++i) {
+			writer=new FileWriter("test.csv",true);
+			bw = new BufferedWriter(writer);
+			writer.write("\n");
+			writer.write(String.valueOf(i));
+			bw.write(',');	
+			long x=arr[i];
+			bw.write(String.valueOf(x));
+			bw.flush();
+			bw.close();
+		}
+		
+		System.out.println("create csv sucess!");
+		
 
 		TestNAForEventDriven na = new TestNAForEventDriven();
 
-
-
-		// 設定迴圈次數，這個要跟 NA 的迴圈次數設一樣，以便DA收完資料時能夠自動停止程式。
-
-		String str_test_loop_count = "1000";
-
-
-
-		if (args.length > 0) {
-
-			str_test_loop_count = args[0];
-
-		}
-
-
-
-		iLoopCount = Integer.parseInt(str_test_loop_count);
-
-		System.out.println(iLoopCount);
 
 		na.run();
 
@@ -150,16 +174,15 @@ public class TestNAForEventDriven {
 
 
 
-	private void run() throws InterruptedException {
-
-
+	private void run() throws InterruptedException, IOException {
+		
+		
 
 		// 0. 啟動HTTP server以便接收notification
 
 		StartHTTPServer();
-
-
-
+	
+		
 		// 1. 先刪除NSCL上的NA
 
 		unregisterToNSCL();
@@ -662,10 +685,9 @@ public class TestNAForEventDriven {
 
 	static int number = 0;
 
-
-
 	static class MyHandler implements HttpHandler {
-
+		
+		
 		public void handle(HttpExchange t) throws IOException {
 
 			String body = "";
@@ -673,8 +695,6 @@ public class TestNAForEventDriven {
 			int i;
 
 			char c;
-
-			
 
 			//2021.5.25 modified 
 
@@ -705,6 +725,7 @@ public class TestNAForEventDriven {
 			}
 
 			++number;
+		
 
 			System.out.println("Received notification:" +number+" times");
 
@@ -784,7 +805,8 @@ public class TestNAForEventDriven {
 
 				//System.out.println(protocol);
 
-				
+				String[] data = content.split("<str name='data' val='");
+		        String payload = data[1].split("'/>")[0];
 
 				
 
@@ -830,11 +852,11 @@ public class TestNAForEventDriven {
 
 					System.out.println("Order: " + idx);
 
-					System.out.println("Content Size:" + content.length());
+					System.out.println("Content Size:" + payload.length());
 
-					// System.out.println("Content:\n" + content + "\n");
+			          // System.out.println("Content:\n" + content + "\n");
 
-					System.out.println("body size = " + body.length());
+			        System.out.println("body size = " + body.length());
 
 					System.out.println("time =" + result);
 
@@ -849,36 +871,31 @@ public class TestNAForEventDriven {
 						delay_avg=delay_sum/(number-50);
 
 						System.out.println("total_avg_delay =" + delay_avg);
-
-						
+	
 
 					}
 
-					
-
-					
-
-					String url = "http://140.116.247.69:9000/receive_delay_as_reward";
-
-					HttpClient httpclient = new HttpClient();
-
-					PostMethod httpMethod = new PostMethod(url);
-
-					StringBuilder sb = new StringBuilder();
-
-					sb.append(result);
-
-					//2021.9.14 mod
-
-					sb.append("//");
-
-					sb.append(idx);
-
-					StringRequestEntity requestEntity = new StringRequestEntity(sb.toString(),"application/xml", "UTF-8");
-
-					httpMethod.setRequestEntity(requestEntity);
-
-					int statuscode = httpclient.executeMethod(httpMethod);
+//					String url = "http://140.116.247.69:9000/receive_delay_as_reward";
+//
+//					HttpClient httpclient = new HttpClient();
+//
+//					PostMethod httpMethod = new PostMethod(url);
+//
+//					StringBuilder sb = new StringBuilder();
+//
+//					sb.append(result);
+//
+//					//2021.9.14 mod
+//
+//					sb.append("//");
+//
+//					sb.append(idx);
+//
+//					StringRequestEntity requestEntity = new StringRequestEntity(sb.toString(),"application/xml", "UTF-8");
+//
+//					httpMethod.setRequestEntity(requestEntity);
+//
+//					int statuscode = httpclient.executeMethod(httpMethod);
 
 					//System.out.print(new String(httpMethod.getResponseBody()));
 
@@ -888,9 +905,8 @@ public class TestNAForEventDriven {
 
 					// 將結果寫到文字檔裡
 
-					//FileWriter fw = new FileWriter("na_delay.txt", true); // True則表示用附加的方式寫到檔案原有內容之後
+//					FileWriter fw = new FileWriter("packet order"+idx+"na_delay.txt", false); // True則表示用附加的方式寫到檔案原有內容之後
 
-//					FileWriter fw = new FileWriter("coap_"+content.length()+curLoss+"_na_delay.txt", true); // True則表示用附加的方式寫到檔案原有內容之後
 
 //					writeToFile("xmpp_"+content.length()+curLoss+"_na_delay.txt", String.valueOf(result));
 
@@ -903,11 +919,33 @@ public class TestNAForEventDriven {
 //					writeToFile("xmpp_"+content.length()+curLoss+"_na_success.txt", Integer.toString(order));
 
 					//System.out.println("Order: " + order);
-
 					
+					
+					// 2021.12.17 
+					// mod
+					int line_idx=Integer.parseInt(idx);
+					Path path = Paths.get("test.csv");
+					List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
+					String s=idx+","+idx+String.valueOf(result);
+					lines.set(line_idx , s);
+					Files.write(path, lines, StandardCharsets.UTF_8);
+					
+					
+					// 2021.12.17 
+					// mod
+//					writetocsv(idx,result);
+//					
+//					FileWriter writer=new FileWriter("test.csv",true);
+//					BufferedWriter bw = new BufferedWriter(writer);
+//					bw.write("\n");
+//					bw.write(idx);
+//					bw.write(',');
+//					bw.write(String.valueOf(result));
+//					bw.flush();
+//					bw.close();
 
 					System.out.println("-----------------------------------------------");
-
+					
 				}
 
 
@@ -1008,9 +1046,8 @@ public class TestNAForEventDriven {
 
 //			}
 
-		}
-
-
+		}		
+		
 
 		private void writeBodyToFile(String body) throws IOException {
 

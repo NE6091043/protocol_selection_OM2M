@@ -758,7 +758,7 @@ public class TestNAForEventDriven {
 
 				final String content = new String(DatatypeConverter.parseBase64Binary(content64));
 
-			
+				//System.out.println(content);
 
 
 
@@ -776,9 +776,11 @@ public class TestNAForEventDriven {
 
 				String[] tmp=content.split("<str name='index' val='");
 
+				System.out.println(tmp[1]+"            ");
 
+				//2021.9.26
 
-				String idx=tmp[1].split("'/></obj>")[0];
+				String idx=tmp[1].split("'/><str name='timestamp'")[0];
 
 
 
@@ -792,11 +794,13 @@ public class TestNAForEventDriven {
 
 					strTimestamp = matcher.group(1);
 
-
+					
 
 					// 取得Device送出訊息時的時間
 
-					long previous_time = Long.parseLong(strTimestamp);
+					//2021.9.26
+
+					long result = Long.parseLong(strTimestamp);
 
 					//2021.5.25 modified 
 
@@ -804,13 +808,15 @@ public class TestNAForEventDriven {
 
 					// 取得目前時間
 
-					long current_time = System.currentTimeMillis();
+					//long current_time = System.currentTimeMillis();
 
 
 
 					// 將時間相減，算出Delay(ms)
 
-					long result = current_time - previous_time;
+					//2021.9.26
+
+					//long result = current_time - previous_time;
 
 					//2021.5.25 modified 
 
