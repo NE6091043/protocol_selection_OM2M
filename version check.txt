@@ -85,3 +85,17 @@ time.sh (v2)
 shut_down_server.java (v1) --in TestNA folder,used to plot loss
 
 
+--------------------------------------agent ask version------------------------------------------
+--common
+core_Activator.java	ok
+XMPP_ipu/ipu_Activator.java	ok
+
+--event 
+18787 port 記得去弄防火牆、NAT設定
+na (v15)	ok
+da (v12)	ok
+XMPP_ipu/ipu_Activator.java	ok
+incse controller/apoccontroller(v4)	ok
+mncse notify(v13)	ok
+mncse notify/ChangeWanem.java(v3)	ok
+notifier/handle_http(v3)	ok
