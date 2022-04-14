@@ -31,12 +31,12 @@ class QLearningTable:
         self.epsilon = e_greedy
         self.q_table = pd.DataFrame(columns=self.actions, dtype=np.float64)
         self.decay = 0.999
-        self.min_egreedy = 0.1
+        self.min_egreedy = 0.05
 
     def choose_action(self, observation):
         self.check_state_exist(observation)
         # action selection
-        if np.random.uniform() < self.epsilon:
+        if np.random.uniform() > self.epsilon:
             # choose best action
             # print(['COAP', 'MQTT', 'WebSocket', 'XMPP'])
             print(self.q_table)
@@ -117,11 +117,11 @@ def start_decision():
         if this_time_reward[1] == False:
             # reward not update => delay so large
             # use prev reward => Give it a large penalty
-            reward = 1/300000
+            reward = -1
         print("------------------")
         print("------------------")
         print("------------------")
-        print(reward)
+        print(agent.epsilon)
         print("------------------")
         print("------------------")
         print("------------------")
@@ -131,16 +131,17 @@ def start_decision():
         # [0,1,2,3]=[mqtt,coap,ws,xmpp]
         # post to OM2M
         # fetch next state from om2m
-        if prev_time_protocol == a:
-            changeprotocol("unchanged")
-        if a == 0:
-            changeprotocol("mqtt")
-        elif a == 1:
-            changeprotocol("coap")
-        elif a == 2:
-            changeprotocol("ws")
-        else:
-            changeprotocol("xmpp")
+        # if prev_time_protocol == a:
+        #     changeprotocol("unchanged")
+        # if a == 0:
+        #     changeprotocol("mqtt")
+        # elif a == 1:
+        #     changeprotocol("coap")
+        # elif a == 2:
+        #     changeprotocol("ws")
+        # else:
+        #     changeprotocol("xmpp")
+        # changeprotocol("xmpp")
         s_ = str(a)
         agent.learn(s, a, reward, s_)
         prev_time_protocol = a
