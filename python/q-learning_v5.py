@@ -39,7 +39,7 @@ class QLearningTable:
         if np.random.uniform() > self.epsilon:
             # choose best action
             # print(['COAP', 'MQTT', 'WebSocket', 'XMPP'])
-            print(self.q_table)
+            # print(self.q_table)
             state_action = self.q_table.loc[observation, :]
             # print(state_action)
             # some actions may have the same value, randomly choose on in these actions
@@ -84,15 +84,25 @@ def changeprotocol(protocol):
     if mncse == 1:
         r = requests.post('http://140.116.247.69:18787/mncse', protocol)
         # a=datasize used
-        a, b, c = r.text.split('//')
-        env_loss = b
-        env_bandwidth = c
+        a = r.text
+        print("-----------------")
+        print("-----------------")
+        print("-----------------")
+        print(a)
+        print("-----------------")
+        print("-----------------")
+        print("-----------------")
     else:
         r = requests.post('http://140.116.247.69:18686/incse', protocol)
         # a=datasize used
-        a, b, c = r.text.split('//')
-        env_loss = b
-        env_bandwidth = c
+        a = r.text
+        print("-----------------")
+        print("-----------------")
+        print("-----------------")
+        print(a)
+        print("-----------------")
+        print("-----------------")
+        print("-----------------")
 
 
 def start_decision():
@@ -118,13 +128,13 @@ def start_decision():
             # reward not update => delay so large
             # use prev reward => Give it a large penalty
             reward = -1
-        print("------------------")
-        print("------------------")
-        print("------------------")
-        print(agent.epsilon)
-        print("------------------")
-        print("------------------")
-        print("------------------")
+        # print("------------------")
+        # print("------------------")
+        # print("------------------")
+        # print(agent.epsilon)
+        # print("------------------")
+        # print("------------------")
+        # print("------------------")
         # prev_time_reward = this_time_reward
         s = str(prev_time_protocol)
         a = agent.choose_action(s)
@@ -141,7 +151,7 @@ def start_decision():
         #     changeprotocol("ws")
         # else:
         #     changeprotocol("xmpp")
-        # changeprotocol("xmpp")
+        # changeprotocol("coap")
         s_ = str(a)
         agent.learn(s, a, reward, s_)
         prev_time_protocol = a
