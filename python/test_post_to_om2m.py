@@ -22,22 +22,32 @@ from collections import defaultdict
 import requests
 
 
-dictToSend = {'question':'what is the answer?'}
+dictToSend = {'question': 'what is the answer?'}
 
-i=0
-s="coap"
+incse = 0
+s = "mqtt"
 
-while i<50000:
-    time.sleep(3)
-    if i%4==0:
-        s="coap"
-    if i%4==1:
-        s="mqtt"
-    if i%4==2:
-        s="ws"
-    if i%4==3:
-        s="xmpp"
-    i+=1
-    print(s)
-    requests.post('http://140.116.247.69:18787/test',s)
-
+# while i<50000:
+#     time.sleep(3)
+#     if i%4==0:
+#         s="coap"
+#     if i%4==1:
+#         s="mqtt"
+#     if i%4==2:
+#         s="ws"
+#     if i%4==3:
+#         s="xmpp"
+#     i+=1
+#     print(s)
+#     requests.post('http://140.116.247.69:18787/mncse',s)
+# incse 18686
+# r = requests.post('http://140.116.247.69:18686/incse', s)
+# mncse 18787
+if incse == 1:
+    r = requests.post('http://140.116.247.69:18686/incse', s)
+else:
+    r = requests.post('http://140.116.247.69:18787/mncse', s)
+a, b, c = r.text.split('//')
+print(a)
+print(b)
+print(c)

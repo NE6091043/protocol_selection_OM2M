@@ -85,3 +85,42 @@ time.sh (v2)
 shut_down_server.java (v1) --in TestNA folder,used to plot loss
 
 
+--------------------------------------agent ask version------------------------------------------
+--common
+core_Activator.java	ok
+XMPP_ipu/ipu_Activator.java	ok
+
+--event 
+18787 port 記得去弄防火牆、NAT設定
+na (v15)	ok
+da (v12)	ok
+XMPP_ipu/ipu_Activator.java	ok
+incse controller/apoccontroller(v4)	ok
+mncse notify(v13)	ok
+mncse notify/ChangeWanem.java(v3)	ok
+notifier/handle_http(v3)	ok
+
+
+--query
+18686 port 記得去弄防火牆、NAT設定
+na (v3)	ok
+da (v3)	ok
+readerhandlerforquery(v3)	ok
+incse redirector/Redirector.java(v3)	ok
+redirector/handle_http(v1)	ok
+
+
+
+--------------------------------------efficiency tshark in monitor module------------------------------------------
+Capture_packet.java
+
+
+--------------------------------------saved_table_version------------------------------------------
+--event
+Capture_packet.java
+q-learning_v9、q-learning_v9(test)
+na (v16)	ok
+da (v13)	ok
+mncse notify(v15)	ok
+mncse notify/ChangeWanem.java(v4)	ok
+notifier/handle_http(v5)	ok
