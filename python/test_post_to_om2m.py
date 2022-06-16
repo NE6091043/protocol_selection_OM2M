@@ -25,7 +25,7 @@ import requests
 dictToSend = {'question': 'what is the answer?'}
 
 incse = 0
-s = "xmpp"
+s = "mqtt"
 
 # while i<50000:
 #     time.sleep(3)
